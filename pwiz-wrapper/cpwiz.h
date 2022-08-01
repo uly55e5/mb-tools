@@ -1,6 +1,6 @@
 #ifndef __cpwiz_H__
 #define __cpwiz_H__
-
+#define _GLIBCXX_USE_CXX11_ABI 0
 #ifdef __cplusplus
 extern "C" {
 #endif

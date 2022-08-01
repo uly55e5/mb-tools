@@ -1,8 +1,9 @@
 package mzmlReader
 
 //#cgo CFLAGS: -I../pwiz-wrapper
-//#cgo LDFLAGS: -L../pwiz-wrapper/lib -lpwiz_wrapper -L/home/david/Projekte/Reference/pwiz/build-linux-x86_64/pwiz/data/msdata/gcc-9/release/link-static/runtime-link-static/threading-multi -Wl,-rpath=../pwiz-wrapper/lib -lstdc++ -lpwiz_data_msdata
+//#cgo LDFLAGS: -L../pwiz-wrapper/lib -lpwiz_wrapper -Wl,-rpath=../pwiz-wrapper/lib -lstdc++ -lpwiz_all -lm -ldl
 //#include "cpwiz.h"
+//#define _GLIBCXX_USE_CXX11_ABI 0
 import "C"
 
 type MSData struct {
@@ -11,5 +12,5 @@ type MSData struct {
 
 func OpenMSData(fileName string) {
 	var file MSData
-	file.msData = C.MSDataOpenFile(fileName)
+	file.msData = C.MSDataOpenFile(C.CString(fileName))
 }

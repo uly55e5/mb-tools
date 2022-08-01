@@ -1,5 +1,6 @@
 # include "cpwiz.h"
 # include "pwiz/data/msdata/MSDataFile.hpp"
+#define _GLIBCXX_USE_CXX11_ABI 0
 
 MSDataFile MSDataOpenFile(char *fileName) {
     auto ms = new pwiz::msdata::MSDataFile(std::string(fileName));
