@@ -5,6 +5,16 @@
 extern "C" {
 #endif
 typedef void *MSDataFile;
+typedef struct  {
+    const char * manufacturer;
+    const char * model;
+	const char * ionisation;
+	const char * analyzer;
+	const char * detector;
+	const char * software;
+	const char * sample;
+	const char * source;
+} InstrumentInfo;
 MSDataFile MSDataOpenFile(char *fileName);
 //MSDataFile[] MSDataOpenFiles(char** fileNames);
 void MSDataClose(MSDataFile msdata);
@@ -28,7 +38,7 @@ void MSDataClose(MSDataFile msdata);
 
 int getLastChrom(MSDataFile);
 
-//Rcpp::List getInstrumentInfo();
+InstrumentInfo getInstrumentInfo(MSDataFile file);
 
 //Rcpp::List getRunInfo();
 
