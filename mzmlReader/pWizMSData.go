@@ -20,25 +20,43 @@ type InstrumentInfo struct {
 }
 
 type MSData struct {
-	msData C.MSDataFile
+	msData         C.MSDataFile
+	fileName       string
+	instrumentInfo *InstrumentInfo
 }
 
 func OpenMSData(fileName string) MSData {
 	var file MSData
+	file.fileName = fileName
 	file.msData = C.MSDataOpenFile(C.CString(fileName))
 	return file
 }
 
-func GetInstrumentInfo(data MSData) InstrumentInfo {
-	cinfo := C.getInstrumentInfo(data.msData)
-	info := InstrumentInfo{}
-	info.manufacturer = C.GoString(cinfo.manufacturer)
-	info.model = C.GoString(cinfo.model)
-	info.ionisation = C.GoString(cinfo.ionisation)
-	info.analyzer = C.GoString(cinfo.analyzer)
-	info.detector = C.GoString(cinfo.detector)
-	info.software = C.GoString(cinfo.software)
-	info.sample = C.GoString(cinfo.sample)
-	info.source = C.GoString(cinfo.source)
-	return info
+func CloseMSData(data MSData) {
+	C.MSDataClose(data.msData)
+}
+
+func GetInstrumentInfo(data MSData) *InstrumentInfo {
+	if data.instrumentInfo == nil {
+		cinfo := C.getInstrumentInfo(data.msData)
+		info := &InstrumentInfo{}
+		info.manufacturer = C.GoString(cinfo.manufacturer)
+		info.model = C.GoString(cinfo.model)
+		info.ionisation = C.GoString(cinfo.ionisation)
+		info.analyzer = C.GoString(cinfo.analyzer)
+		info.detector = C.GoString(cinfo.detector)
+		info.software = C.GoString(cinfo.software)
+		info.sample = C.GoString(cinfo.sample)
+		info.source = C.GoString(cinfo.source)
+		data.instrumentInfo = info
+	}
+	return data.instrumentInfo
+}
+
+func getLastChrom(data MSData) int {
+	return int(C.getLastChrom(data.msData))
+}
+
+func getFileName(data MSData) string {
+	return data.fileName
 }

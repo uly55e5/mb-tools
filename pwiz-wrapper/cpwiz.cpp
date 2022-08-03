@@ -16,8 +16,8 @@ void MSDataClose(MSDataFile file) {
 }
 
 int getLastChrom(MSDataFile file) {
-    auto clp = ((pwiz::msdata::MSDataFile *) file)->run.chromatogramListPtr;
-    return (int) clp->size();
+    auto chromP = ((pwiz::msdata::MSDataFile *) file)->run.chromatogramListPtr;
+    return (int) chromP->size();
 }
 
 InstrumentInfo getInstrumentInfo(MSDataFile file) {
