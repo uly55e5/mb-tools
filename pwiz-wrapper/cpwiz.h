@@ -15,7 +15,17 @@ typedef struct  {
 	const char * sample;
 	const char * source;
 } InstrumentInfo;
-MSDataFile MSDataOpenFile(char *fileName);
+
+
+typedef struct {
+    const char** names;
+    const void * * values;
+    long unsigned int numRows;
+    long unsigned int numCols;
+    const char * error;
+} Header;
+
+MSDataFile MSDataOpenFile(const char *fileName);
 //MSDataFile[] MSDataOpenFiles(char** fileNames);
 void MSDataClose(MSDataFile msdata);
 
@@ -34,7 +44,7 @@ void MSDataClose(MSDataFile msdata);
  */
 //string getFilename();
 
-//int getLastScan() const;
+unsigned long getLastScan(MSDataFile);
 
 int getLastChrom(MSDataFile);
 
@@ -47,9 +57,9 @@ InstrumentInfo getInstrumentInfo(MSDataFile file);
  * no longer returns a List, but a DataFrame, even if length whichScan is 1.
  * @return The scan header info is returned as a Rcpp::DataFrame
  **/
-/*  Rcpp::DataFrame getScanHeaderInfo(Rcpp::IntegerVector whichScan);
+    Header getScanHeaderInfo(MSDataFile file, const int* scans, int size);
 
-    Rcpp::DataFrame getChromatogramHeaderInfo(Rcpp::IntegerVector whichScan);
+/*    Rcpp::DataFrame getChromatogramHeaderInfo(Rcpp::IntegerVector whichScan);
 
     Rcpp::DataFrame getChromatogramsInfo(int whichChrom);
 
@@ -63,8 +73,12 @@ InstrumentInfo getInstrumentInfo(MSDataFile file);
 
     string getRunStartTimeStamp();
 */
+
+
 #ifdef __cplusplus
 }
+
+
 #endif
 
 #endif
