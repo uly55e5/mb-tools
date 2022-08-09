@@ -60,6 +60,29 @@ unsigned long getLastScan(MSDataFile file) {
     return listP->size();
 }
 
+typedef struct {
+    std::vector<double> high;
+    std::vector<double> low;
+} IWindows;
+
+IsolationWindows *getIsolationWindow(MSDataFile file) {
+    auto ffile = (pwiz::msdata::MSDataFile *) file;
+    auto SpectrumListP = ffile->run.spectrumListPtr;
+    auto cIWindows = new IsolationWindows{};
+    auto iWindows = new IWindows {};
+    for (int i = 0; i < SpectrumListP->size(); i++) {
+        auto SpectrumP = SpectrumListP->spectrum(i, pwiz::msdata::DetailLevel_FullMetadata);
+        if (!SpectrumP->precursors.empty()) {
+            auto iwin = SpectrumP->precursors[0].isolationWindow;
+            iWindows->high.push_back(iwin.cvParam(pwiz::cv::MS_isolation_window_upper_offset).value.empty() ? NAN :
+                                     iwin.cvParam(pwiz::cv::MS_isolation_window_upper_offset).valueAs<double>());
+            iWindows->low.push_back(iwin.cvParam(pwiz::cv::MS_isolation_window_lower_offset).value.empty() ? NAN :
+                                    iwin.cvParam(pwiz::cv::MS_isolation_window_lower_offset).valueAs<double>());
+        }
+    }
+    return new IsolationWindows{ iWindows->high.data(),iWindows->low.data(),iWindows->high.size()};
+}
+
 Header getScanHeaderInfo(MSDataFile file, const int *scans, int scansSize) {
     auto ffile = (pwiz::msdata::MSDataFile *) file;
     auto *headerM = new HeaderMap{
@@ -359,3 +382,62 @@ int getAcquisitionNumber(MSDataFile file, std::string id, size_t index) {
         return boost::lexical_cast<int>(scanNumber);
 }
 
+const char* getRunStartTimeStamp(MSDataFile file) {
+    auto ffile = (pwiz::msdata::MSDataFile *) file;
+    return ffile->run.startTimeStamp.c_str();
+
+}
+
+
+
+typedef std::vector<std::vector<double>> Matrix;
+
+PeakList getPeakList(MSDataFile file, int * scans, int size) {
+    auto ffile = (pwiz::msdata::MSDataFile *) file;
+    PeakList result{};
+    const char * names[2] = {"mz","intensity"};
+    result.colnames = names;
+    result.colNum =2;
+
+    auto slp = ffile->run.spectrumListPtr;
+
+        int current_scan;
+        auto res = std::vector<Matrix>(size);
+        for (size_t i = 0; i < size; i++) {
+            current_scan = scans[i];
+            if (current_scan < 0 || current_scan >= slp->size()) {
+                result.error = ("Index whichScan out of bounds [1 ..."+ std::to_string(size)+"%d].\n").c_str();
+                return result;
+            }
+            size_t current_index = static_cast<size_t>(current_scan);
+            auto sp = slp->spectrum(current_index, pwiz::msdata::DetailLevel_FullData);
+            auto mzs = sp->getMZArray();
+            auto ints = sp->getIntensityArray();
+            if (!mzs.get() || !ints.get()) {
+                res.at(i) = Matrix(2);
+                continue;
+            }
+            if (mzs->data.size() != ints->data.size())
+                result.error = "Sizes of mz and intensity arrays don't match.";
+            auto  data_matrix = Matrix {mzs->data,ints->data};
+            res.at(i) = data_matrix;
+        }
+
+
+        result.scanNum = size;
+        result.values = new double**[size];
+        result.valSizes = new int[size];
+        for (int i=0; i<size; i++) {
+            auto valSize = res[i][0].size();
+            result.valSizes[i] = valSize;
+            result.values[i]=new double*[2];
+            result.values[i][0] = new double[valSize];
+            result.values[i][1] = new double[valSize];
+            for (int j=0; j<valSize; j++) {
+                result.values[i][0][j]=res.at(i).at(0).at(j);
+                result.values[i][1][j]=res.at(i).at(1).at(j);
+            }
+        }
+
+        return result;
+}

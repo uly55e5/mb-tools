@@ -8,8 +8,10 @@ import "C"
 //#define _GLIBCXX_USE_CXX11_ABI 0
 import "C"
 import (
+	"golang.org/x/exp/constraints"
 	"reflect"
 	"strings"
+	"time"
 	"unsafe"
 )
 
@@ -83,6 +85,11 @@ type MSData struct {
 	instrumentInfo *InstrumentInfo
 }
 
+type IsolationWindow struct {
+	high float64
+	low  float64
+}
+
 func (data *MSData) Get3DMap(scans int, lowMz float64, highMz float64, resMZ float64) {
 
 }
@@ -91,45 +98,54 @@ func (data *MSData) WriteMSFile(fileName string, format string) {
 
 }
 
-func (data *MSData) GetLength() int {
+func (data *MSData) Length() int {
 	return int(C.getLastScan(data.msData))
 
 }
 
-func (data *MSData) GetManufacturer() string {
+func (data *MSData) Manufacturer() string {
 	if data.instrumentInfo == nil {
-		data.GetInstrumentInfo()
+		data.InstrumentInfo()
 	}
 	return data.instrumentInfo.manufacturer
 }
 
-func (data *MSData) GetModel() string {
+func (data *MSData) Model() string {
 	if data.instrumentInfo == nil {
-		data.GetInstrumentInfo()
+		data.InstrumentInfo()
 	}
 	return data.instrumentInfo.model
 }
 
-func (data *MSData) GetIonisation() string {
+func (data *MSData) Ionisation() string {
 	if data.instrumentInfo == nil {
-		data.GetInstrumentInfo()
+		data.InstrumentInfo()
 	}
 	return data.instrumentInfo.ionisation
 }
 
-func (data *MSData) GetAnalyzer() string {
+func (data *MSData) Analyzer() string {
 	if data.instrumentInfo == nil {
-		data.GetInstrumentInfo()
+		data.InstrumentInfo()
 	}
 	return data.instrumentInfo.analyzer
 }
 
-func (data *MSData) GetDetector() string {
-	data.GetInstrumentInfo()
+func (data *MSData) Detector() string {
+	data.InstrumentInfo()
 	return data.instrumentInfo.detector
 }
 
-func (data *MSData) GetHeader(scans []int) *HeaderInfo {
+func (data *MSData) Header() *HeaderInfo {
+	size := data.Length()
+	allScans := make([]int, size)
+	for i, _ := range allScans {
+		allScans[i] = i
+	}
+	return data.HeaderForScans(allScans)
+}
+
+func (data *MSData) HeaderForScans(scans []int) *HeaderInfo {
 	cScans, length := gSlice2CArrayInt(scans)
 	cheader := C.getScanHeaderInfo(data.msData, cScans, C.int(length))
 	header := HeaderInfo{}
@@ -236,47 +252,156 @@ func gSlice2CArrayInt(gSlice []int) (*C.int, int) {
 	return (*C.int)(unsafe.Pointer(sliceHeader.Data)), len(gSlice)
 }
 
-func (data *MSData) GetPeaks(scans int) {
+type PeakList struct {
+	values   [][]([]([]float64))
+	colNames []string
+}
+
+func (data *MSData) Peaks(scans []int) PeakList {
+	cScans, scanLen := gSlice2CArrayInt(scans)
+	cPeakList := C.getPeakList(data.msData, cScans, C.int(scanLen))
+	var peakList PeakList
+	names := cArray2GoSliceStr(cPeakList.colnames, int(cPeakList.colNum))
+	peakList.colNames = names
+	valSizes := cArray2GoSliceInt(cPeakList.valSizes, int(cPeakList.scanNum))
+	cVals := []**C.double{}
+	sliceHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cVals)))
+	sliceHeader.Cap = int(cPeakList.scanNum)
+	sliceHeader.Len = int(cPeakList.scanNum)
+	sliceHeader.Data = uintptr(unsafe.Pointer(cPeakList.values))
+	peakList.values = make([][][][]float64, int(cPeakList.scanNum))
+	for i := 0; i < int(cPeakList.scanNum); i++ {
+		peakList.values[i] = make([][][]float64, 2)
+		cScanVals := []*C.double{}
+		cScanValsH := (*reflect.SliceHeader)((unsafe.Pointer(&cScanVals)))
+		cScanValsH.Cap = int(cPeakList.colNum)
+		cScanValsH.Len = int(cPeakList.colNum)
+		cScanValsH.Data = uintptr(unsafe.Pointer(cVals[i]))
+		mzs := cArray2GoSliceDouble(cScanVals[0], valSizes[i])
+		ints := cArray2GoSliceDouble(cScanVals[1], valSizes[i])
+		peakList.values[i][0] = append(peakList.values[i][0], mzs)
+		peakList.values[i][1] = append(peakList.values[i][1], ints)
+	}
+	return peakList
+}
+
+func (data *MSData) Spectra(scans int) {
 
 }
 
-func (data *MSData) GetSpectra(scans int) {
+func (data *MSData) PeaksCount(scans int) {
 
 }
 
-func (data *MSData) GetPeaksCount(scans int) {
-
+type RunInfo struct {
+	scanCount      int
+	lowMz          float64
+	highMz         float64
+	dStartTime     float64
+	dEndTime       float64
+	msLevels       []int
+	startTimeStamp time.Time
 }
 
-func (data *MSData) GetRunInfo() {
-
+func max[T constraints.Ordered](s []T) T {
+	if len(s) == 0 {
+		var zero T
+		return zero
+	}
+	m := s[0]
+	for _, v := range s {
+		if m < v {
+			m = v
+		}
+	}
+	return m
 }
 
-func (data *MSData) GetSoftwareInfo() {
-
+func min[T constraints.Ordered](s []T) T {
+	if len(s) == 0 {
+		var zero T
+		return zero
+	}
+	m := s[0]
+	for _, v := range s {
+		if m > v {
+			m = v
+		}
+	}
+	return m
 }
 
-func (data *MSData) GetSampleInfo() {
-
+func unique[T comparable](array []T) []T {
+	var uniqeVals []T
+	m := map[T]bool{}
+	for _, v := range array {
+		if !m[v] {
+			m[v] = true
+			uniqeVals = append(uniqeVals, v)
+		}
+	}
+	return uniqeVals
 }
 
-func (data *MSData) GetSourceInfo() {
+func (data *MSData) GetRunInfo() RunInfo {
+	header := data.Header()
+	var runInfo = RunInfo{}
+	runInfo.scanCount = data.Length()
+	runInfo.lowMz = min(header.LowMZ)
+	runInfo.highMz = max(header.HighMZ)
+	runInfo.dStartTime = min(header.RetentionTime)
+	runInfo.dEndTime = max(header.RetentionTime)
+	runInfo.msLevels = unique(header.MsLevel)
+	//timeStamp = C.getRunSTartTimeStamp(data.msData)
+	//runInfo.startTimeStamp = timeStamp
+	return runInfo
+}
 
+func (data *MSData) SoftwareInfo() string {
+	if data.instrumentInfo == nil {
+		data.InstrumentInfo()
+	}
+	return data.instrumentInfo.software
+}
+
+func (data *MSData) SampleInfo() string {
+	if data.instrumentInfo == nil {
+		data.InstrumentInfo()
+	}
+	return data.instrumentInfo.sample
+}
+
+func (data *MSData) SourceInfo() string {
+	if data.instrumentInfo == nil {
+		data.InstrumentInfo()
+	}
+	return data.instrumentInfo.source
 }
 
 func (data *MSData) String() string {
 	return ""
 }
 
-func (data *MSData) isolationWindow() {
+func (data *MSData) IsolationWindow(uniqueVals bool) []IsolationWindow {
+	cWin := C.getIsolationWindow(data.msData)
+	iWin := []IsolationWindow{}
+	high := cArray2GoSliceDouble(cWin.high, int(cWin.size))
+	low := cArray2GoSliceDouble(cWin.low, int(cWin.size))
+	for i, _ := range high {
+		iWin = append(iWin, IsolationWindow{high[i], low[i]})
+	}
 
+	if uniqueVals {
+		return unique(iWin)
+	}
+	return iWin
 }
 
-func (data *MSData) tic() Chromatogram {
-	return data.chromatogram(0)
+func (data *MSData) TIC() *Chromatogram {
+	return data.Chromatogram(0)
 }
 
-func (data *MSData) chromatogram(chromIdx int) Chromatogram {
+func (data *MSData) Chromatogram(chromIdx int) *Chromatogram {
 	cInfo := C.getChromatogramInfo(data.msData, C.int(chromIdx))
 	var chromatogram = Chromatogram{}
 	chromatogram.intensity = cArray2GoSliceDouble(cInfo.intensity, int(cInfo.size))
@@ -286,52 +411,53 @@ func (data *MSData) chromatogram(chromIdx int) Chromatogram {
 	if errorM != "" {
 		println(errorM)
 	}
-	return chromatogram
+	return &chromatogram
 }
 
-func (data *MSData) chromatograms(chromIdxs []int) []Chromatogram {
-	var chroms = []Chromatogram{}
+func (data *MSData) Chromatograms(chromIdxs []int) []*Chromatogram {
+	var chroms = []*Chromatogram{}
 	for _, idx := range chromIdxs {
-		chroms = append(chroms, data.chromatogram(idx))
+		chroms = append(chroms, data.Chromatogram(idx))
 	}
 	return chroms
 }
 
-func (data *MSData) chromatogramHeader(scans []int) ChromatogramHeaderInfo {
+func (data *MSData) ChromatogramHeader(scans []int) *ChromatogramHeaderInfo {
 	cScans, length := gSlice2CArrayInt(scans)
 	cheader := C.getChromatogramHeaderInfo(data.msData, cScans, C.int(length))
 	chromInfo := ChromatogramHeaderInfo{}
 	convertHeaderData(&chromInfo, cheader.names, cheader.values, cheader.numCols, cheader.numRows)
-	return chromInfo
-
+	return &chromInfo
 }
 
-func OpenMSData(fileName string) MSData {
+func OpenMSData(fileName string) *MSData {
 	var file MSData
 	file.fileName = fileName
 	file.msData = C.MSDataOpenFile(C.CString(fileName))
-	return file
+	return &file
 }
 
 func (data *MSData) CloseMSData() {
 	C.MSDataClose(data.msData)
 }
 
-func (data *MSData) GetInstrumentInfo() *InstrumentInfo {
-	cinfo := C.getInstrumentInfo(data.msData)
-	info := &InstrumentInfo{}
-	info.manufacturer = C.GoString(cinfo.manufacturer)
-	info.model = C.GoString(cinfo.model)
-	info.ionisation = C.GoString(cinfo.ionisation)
-	info.analyzer = C.GoString(cinfo.analyzer)
-	info.detector = C.GoString(cinfo.detector)
-	info.software = C.GoString(cinfo.software)
-	info.sample = C.GoString(cinfo.sample)
-	info.source = C.GoString(cinfo.source)
-	data.instrumentInfo = info
+func (data *MSData) InstrumentInfo() *InstrumentInfo {
+	if data.instrumentInfo == nil {
+		cinfo := C.getInstrumentInfo(data.msData)
+		info := InstrumentInfo{}
+		info.manufacturer = C.GoString(cinfo.manufacturer)
+		info.model = C.GoString(cinfo.model)
+		info.ionisation = C.GoString(cinfo.ionisation)
+		info.analyzer = C.GoString(cinfo.analyzer)
+		info.detector = C.GoString(cinfo.detector)
+		info.software = C.GoString(cinfo.software)
+		info.sample = C.GoString(cinfo.sample)
+		info.source = C.GoString(cinfo.source)
+		data.instrumentInfo = &info
+	}
 	return data.instrumentInfo
 }
 
-func (data *MSData) getFileName() string {
+func (data *MSData) FileName() string {
 	return data.fileName
 }

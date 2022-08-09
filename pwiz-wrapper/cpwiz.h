@@ -33,6 +33,21 @@ typedef struct {
     long unsigned int size;
 } ChromatogramInfo;
 
+typedef struct {
+    double * high;
+    double * low;
+    long unsigned int size;
+} IsolationWindows;
+
+typedef  struct {
+    const char * error;
+    const char** colnames;
+    int colNum;
+    int scanNum;
+    double *** values;
+    int * valSizes;
+
+} PeakList;
 
 MSDataFile MSDataOpenFile(const char *fileName);
 //MSDataFile[] MSDataOpenFiles(char** fileNames);
@@ -72,6 +87,8 @@ Header *getChromatogramHeaderInfo(MSDataFile file, const int *scans, int scansSi
 
     ChromatogramInfo * getChromatogramInfo(MSDataFile file, int chromIdx);
 
+IsolationWindows *getIsolationWindow(MSDataFile file);
+
 /*    Rcpp::DataFrame getAllScanHeaderInfo();
 
     Rcpp::DataFrame getAllChromatogramHeaderInfo();
@@ -80,9 +97,9 @@ Header *getChromatogramHeaderInfo(MSDataFile file, const int *scans, int scansSi
 
     Rcpp::NumericMatrix get3DMap(std::vector<int> scanNumbers, double whichMzLow, double whichMzHigh, double resMz);
 
-    string getRunStartTimeStamp();
 */
-
+const char* getRunStartTimeStamp(MSDataFile file);
+PeakList getPeakList(MSDataFile file, int * scans, int size);
 
 #ifdef __cplusplus
 }
