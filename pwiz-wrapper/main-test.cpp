@@ -6,5 +6,5 @@
 int main() {
     auto file = MSDataOpenFile("../data/examples/small.pwiz.1.1.mzML");
     int scans[] = {0};
-    getScanHeaderInfo(file, scans,1);
+    getChromatogramHeaderInfo(file, scans,1);
 }

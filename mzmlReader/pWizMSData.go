@@ -25,37 +25,56 @@ type InstrumentInfo struct {
 }
 
 type HeaderInfo struct {
-	SeqNum                     *[]int
-	AcquisitionNum             *[]int
-	MsLevel                    *[]int
-	Polarity                   *[]int
-	PeaksCount                 *[]int
-	TotIonCurrent              *[]float32
-	RetentionTime              *[]float32
-	BasePeakMZ                 *[]float32
-	BasePeakIntensity          *[]float32
-	CollisionEnergy            *[]float32
-	IonisationEnergy           *[]float32
-	LowMZ                      *[]float32
-	HighMZ                     *[]float32
-	PrecursorScanNum           *[]int
-	PrecursorMZ                *[]float32
-	PrecursorCharge            *[]int
-	PrecursorIntensity         *[]float32
-	MergedScan                 *[]int
-	MergedResultScanNum        *[]int
-	MergedResultStartScanNum   *[]int
-	MergedResultEndScanNum     *[]int
-	IonInjectionTime           *[]float32
-	FilterString               *[]string
-	SpectrumId                 *[]string
-	Centroided                 *[]bool
-	IonMobilityDriftTime       *[]float32
-	IsolationWindowTargetMZ    *[]float32
-	IsolationWindowLowerOffset *[]float32
-	IsolationWindowUpperOffset *[]float32
-	ScanWindowLowerLimit       *[]float32
-	ScanWindowUpperLimit       *[]float32
+	SeqNum                     []int
+	AcquisitionNum             []int
+	MsLevel                    []int
+	Polarity                   []int
+	PeaksCount                 []int
+	TotIonCurrent              []float64
+	RetentionTime              []float64
+	BasePeakMZ                 []float64
+	BasePeakIntensity          []float64
+	CollisionEnergy            []float64
+	IonisationEnergy           []float64
+	LowMZ                      []float64
+	HighMZ                     []float64
+	PrecursorScanNum           []int
+	PrecursorMZ                []float64
+	PrecursorCharge            []int
+	PrecursorIntensity         []float64
+	MergedScan                 []int
+	MergedResultScanNum        []int
+	MergedResultStartScanNum   []int
+	MergedResultEndScanNum     []int
+	IonInjectionTime           []float64
+	FilterString               []string
+	SpectrumId                 []string
+	Centroided                 []bool
+	IonMobilityDriftTime       []float64
+	IsolationWindowTargetMZ    []float64
+	IsolationWindowLowerOffset []float64
+	IsolationWindowUpperOffset []float64
+	ScanWindowLowerLimit       []float64
+	ScanWindowUpperLimit       []float64
+}
+
+type ChromatogramHeaderInfo struct {
+	ChromatogramId                      []string
+	ChromatogramIndex                   []int
+	Polarity                            []int
+	PrecursorIsolationWindowTargetMZ    []float64
+	PrecursorIsolationWindowLowerOffset []float64
+	PrecursorIsolationWindowUpperOffset []float64
+	PrecursorCollisionEnergy            []float64
+	ProductIsolationWindowTargetMZ      []float64
+	ProductIsolationWindowLowerOffset   []float64
+	ProductIsolationWindowUpperOffset   []float64
+}
+
+type Chromatogram struct {
+	Id        string
+	time      []float64
+	intensity []float64
 }
 
 type MSData struct {
@@ -64,7 +83,7 @@ type MSData struct {
 	instrumentInfo *InstrumentInfo
 }
 
-func (data *MSData) Get3DMap(scans int, lowMz float32, highMz float32, resMZ float32) {
+func (data *MSData) Get3DMap(scans int, lowMz float64, highMz float64, resMZ float64) {
 
 }
 
@@ -110,36 +129,54 @@ func (data *MSData) GetDetector() string {
 	return data.instrumentInfo.detector
 }
 
-func (data *MSData) GetHeader(scans []int) {
+func (data *MSData) GetHeader(scans []int) *HeaderInfo {
 	cScans, length := gSlice2CArrayInt(scans)
 	cheader := C.getScanHeaderInfo(data.msData, cScans, C.int(length))
-	println(cheader.numCols)
-	errorM := C.GoString(cheader.error)
-	println(errorM)
-	names := cArray2GoSliceStr(cheader.names, int(cheader.numCols))
-	println(names)
 	header := HeaderInfo{}
+
+	errorM := C.GoString(cheader.error)
+	if errorM != "" {
+		println(errorM)
+		return nil
+	}
+	convertHeaderData(&header, cheader.names, cheader.values, cheader.numCols, cheader.numRows)
+	return &header
+}
+
+func convertHeaderData(header interface{}, cNames **C.char, cVals *unsafe.Pointer, numCols C.ulong, numRows C.ulong) {
+	names := cArray2GoSliceStr(cNames, int(numCols))
 	for i, n := range names {
 		nameB := []byte(n)
 		nameB[0] = strings.ToUpper(string(nameB[0]))[0]
 		n = string(nameB)
-		val := reflect.ValueOf(&header).Elem().FieldByName(string(n))
-		cVals := unsafe.Slice((*unsafe.Pointer)(cheader.values), int(cheader.numCols))
-		if val.Type() == reflect.TypeOf(&[]int{}) {
-			v := cArray2GoSliceInt((*C.int)(cVals[i]), int(cheader.numRows))
-			val.Set(reflect.ValueOf(&v))
-		} else if val.Type() == reflect.TypeOf(&[]float32{}) {
-			v := cArray2GoSliceDouble((*C.double)(cVals[i]), int(cheader.numRows))
-			val.Set(reflect.ValueOf(&v))
-		} else if val.Type() == reflect.TypeOf(&[]string{}) {
-			v := cArray2GoSliceStr((**C.char)(cVals[i]), int(cheader.numRows))
-			val.Set(reflect.ValueOf(&v))
-		} else if val.Type() == reflect.TypeOf(&[]bool{}) {
-			v := cArray2GoSliceBool((*C.char)(cVals[i]), int(cheader.numRows))
-			val.Set(reflect.ValueOf(&v))
+		val := reflect.ValueOf(header).Elem().FieldByName(string(n))
+		cVals := unsafe.Slice((*unsafe.Pointer)(cVals), int(numCols))
+		if val.Type() == reflect.TypeOf([]int{}) {
+			v := cArray2GoSliceInt((*C.int)(cVals[i]), int(numRows))
+			for _, vc := range v {
+				reflect.Append(val, reflect.ValueOf(vc))
+			}
+			val.Set(reflect.ValueOf(v))
+		} else if val.Type() == reflect.TypeOf([]float64{}) {
+			v := cArray2GoSliceDouble((*C.double)(cVals[i]), int(numRows))
+			for _, vc := range v {
+				reflect.Append(val, reflect.ValueOf(vc))
+			}
+			val.Set(reflect.ValueOf(v))
+		} else if val.Type() == reflect.TypeOf([]string{}) {
+			v := cArray2GoSliceStr((**C.char)(cVals[i]), int(numRows))
+			for _, vc := range v {
+				reflect.Append(val, reflect.ValueOf(vc))
+			}
+			val.Set(reflect.ValueOf(v))
+		} else if val.Type() == reflect.TypeOf([]bool{}) {
+			v := cArray2GoSliceBool((*C.char)(cVals[i]), int(numRows))
+			for _, vc := range v {
+				reflect.Append(val, reflect.ValueOf(vc))
+			}
+			val.Set(reflect.ValueOf(v))
 		}
 	}
-	println(&header)
 }
 
 func cArray2GoSliceInt(array *C.int, length int) []int {
@@ -168,15 +205,15 @@ func cArray2GoSliceBool(array *C.char, length int) []bool {
 	return gSlice
 }
 
-func cArray2GoSliceDouble(array *C.double, length int) []float32 {
+func cArray2GoSliceDouble(array *C.double, length int) []float64 {
 	cSlice := []C.double{}
 	sliceHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cSlice)))
 	sliceHeader.Cap = length
 	sliceHeader.Len = length
 	sliceHeader.Data = uintptr(unsafe.Pointer(array))
-	var gSlice = []float32{}
+	var gSlice = []float64{}
 	for _, ci := range cSlice {
-		gSlice = append(gSlice, float32(ci))
+		gSlice = append(gSlice, float64(ci))
 	}
 	return gSlice
 }
@@ -235,12 +272,39 @@ func (data *MSData) isolationWindow() {
 
 }
 
-func (data *MSData) tic() {
+func (data *MSData) tic() Chromatogram {
+	return data.chromatogram(0)
 }
 
-func (data *MSData) chromatograms() {}
+func (data *MSData) chromatogram(chromIdx int) Chromatogram {
+	cInfo := C.getChromatogramInfo(data.msData, C.int(chromIdx))
+	var chromatogram = Chromatogram{}
+	chromatogram.intensity = cArray2GoSliceDouble(cInfo.intensity, int(cInfo.size))
+	chromatogram.time = cArray2GoSliceDouble(cInfo.time, int(cInfo.size))
+	chromatogram.Id = C.GoString(cInfo.id)
+	var errorM string = C.GoString(cInfo.error)
+	if errorM != "" {
+		println(errorM)
+	}
+	return chromatogram
+}
 
-func (data *MSData) chromatogramHeader() {}
+func (data *MSData) chromatograms(chromIdxs []int) []Chromatogram {
+	var chroms = []Chromatogram{}
+	for _, idx := range chromIdxs {
+		chroms = append(chroms, data.chromatogram(idx))
+	}
+	return chroms
+}
+
+func (data *MSData) chromatogramHeader(scans []int) ChromatogramHeaderInfo {
+	cScans, length := gSlice2CArrayInt(scans)
+	cheader := C.getChromatogramHeaderInfo(data.msData, cScans, C.int(length))
+	chromInfo := ChromatogramHeaderInfo{}
+	convertHeaderData(&chromInfo, cheader.names, cheader.values, cheader.numCols, cheader.numRows)
+	return chromInfo
+
+}
 
 func OpenMSData(fileName string) MSData {
 	var file MSData

@@ -25,6 +25,15 @@ typedef struct {
     const char * error;
 } Header;
 
+typedef struct {
+    double* time;
+    double* intensity;
+    const char * id;
+    const char * error;
+    long unsigned int size;
+} ChromatogramInfo;
+
+
 MSDataFile MSDataOpenFile(const char *fileName);
 //MSDataFile[] MSDataOpenFiles(char** fileNames);
 void MSDataClose(MSDataFile msdata);
@@ -59,11 +68,11 @@ InstrumentInfo getInstrumentInfo(MSDataFile file);
  **/
     Header getScanHeaderInfo(MSDataFile file, const int* scans, int size);
 
-/*    Rcpp::DataFrame getChromatogramHeaderInfo(Rcpp::IntegerVector whichScan);
+Header *getChromatogramHeaderInfo(MSDataFile file, const int *scans, int scansSize);
 
-    Rcpp::DataFrame getChromatogramsInfo(int whichChrom);
+    ChromatogramInfo * getChromatogramInfo(MSDataFile file, int chromIdx);
 
-    Rcpp::DataFrame getAllScanHeaderInfo();
+/*    Rcpp::DataFrame getAllScanHeaderInfo();
 
     Rcpp::DataFrame getAllChromatogramHeaderInfo();
 

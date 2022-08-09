@@ -14,8 +14,7 @@ typedef std::vector<char> LogicalVector;
 typedef std::map<std::string, std::variant<IntegerVector, NumericVector, StringVector, LogicalVector>> HeaderMap;
 
 
-int getAcquisitionNumber(MSDataFile file,std::string id, size_t index);
-
+int getAcquisitionNumber(MSDataFile file, std::string id, size_t index);
 
 
 MSDataFile MSDataOpenFile(const char *fileName) {
@@ -63,7 +62,7 @@ unsigned long getLastScan(MSDataFile file) {
 
 Header getScanHeaderInfo(MSDataFile file, const int *scans, int scansSize) {
     auto ffile = (pwiz::msdata::MSDataFile *) file;
-    auto (*headerM) = new HeaderMap {
+    auto *headerM = new HeaderMap{
             {"seqNum",                     IntegerVector{}},
             {"acquisitionNum",             IntegerVector{}},
             {"msLevel",                    IntegerVector{}},
@@ -104,9 +103,11 @@ Header getScanHeaderInfo(MSDataFile file, const int *scans, int scansSize) {
         auto SpectrumP = SpectrumListP->spectrum(current_index, pwiz::msdata::DetailLevel_FullMetadata);
         auto &scan = SpectrumP->scanList.scans[0];
         std::get<IntegerVector>((*headerM)["seqNum"]).push_back(current_scan);
-        std::get<IntegerVector>((*headerM)["acquisitionNum"]).push_back(getAcquisitionNumber(file,SpectrumP->id, current_index));
+        std::get<IntegerVector>((*headerM)["acquisitionNum"]).push_back(
+                getAcquisitionNumber(file, SpectrumP->id, current_index));
         std::get<StringVector>((*headerM)["spectrumId"]).push_back(SpectrumP->id);
-        std::get<IntegerVector>((*headerM)["msLevel"]).push_back(SpectrumP->cvParam(pwiz::cv::MS_ms_level).valueAs<int>());
+        std::get<IntegerVector>((*headerM)["msLevel"]).push_back(
+                SpectrumP->cvParam(pwiz::cv::MS_ms_level).valueAs<int>());
         std::get<IntegerVector>((*headerM)["peaksCount"]).push_back(static_cast<int>(SpectrumP->defaultArrayLength));
         std::get<NumericVector>((*headerM)["totIonCurrent"]).push_back(
                 SpectrumP->cvParam(pwiz::cv::MS_total_ion_current).valueAs<double>());
@@ -150,67 +151,211 @@ Header getScanHeaderInfo(MSDataFile file, const int *scans, int scansSize) {
         std::get<IntegerVector>((*headerM)["mergedResultStartScanNum"]).push_back(-1);
         std::get<IntegerVector>((*headerM)["mergedResultEndScanNum"]).push_back(-1);
 
-            const auto &precursor = !SpectrumP->precursors.empty() ? SpectrumP->precursors[0] : pwiz::msdata::Precursor{};
-            std::get<NumericVector>((*headerM)["collisionEnergy"]).push_back(
-                    precursor.activation.cvParam(pwiz::cv::MS_collision_energy).valueAs<double>());
-            size_t precursorIndex = SpectrumListP->find(precursor.spectrumID);
-            if (precursorIndex < SpectrumListP->size()) {
-                std::get<IntegerVector>((*headerM)["precursorScanNum"]).push_back(getAcquisitionNumber(file,precursor.spectrumID, precursorIndex));
-            } else {
-                std::get<IntegerVector>((*headerM)["precursorScanNum"]).push_back(-1);
-            }
-            const auto &selectedIon = !precursor.selectedIons.empty() ?  precursor.selectedIons[0] : pwiz::msdata::SelectedIon{};
-                std::get<NumericVector>((*headerM)["precursorMZ"]).push_back(
-                        selectedIon.cvParam(pwiz::cv::MS_selected_ion_m_z).value.empty()
-                        ? selectedIon.cvParam(pwiz::cv::MS_m_z).valueAs<double>()
-                        : selectedIon.cvParam(pwiz::cv::MS_selected_ion_m_z).valueAs<double>());
-                std::get<IntegerVector>((*headerM)["precursorCharge"]).push_back(
-                        selectedIon.cvParam(pwiz::cv::MS_charge_state).valueAs<int>());
-                std::get<NumericVector>((*headerM)["precursorIntensity"]).push_back(
-                        selectedIon.cvParam(pwiz::cv::MS_peak_intensity).valueAs<double>());
+        const auto &precursor = !SpectrumP->precursors.empty() ? SpectrumP->precursors[0] : pwiz::msdata::Precursor{};
+        std::get<NumericVector>((*headerM)["collisionEnergy"]).push_back(
+                precursor.activation.cvParam(pwiz::cv::MS_collision_energy).valueAs<double>());
+        size_t precursorIndex = SpectrumListP->find(precursor.spectrumID);
+        if (precursorIndex < SpectrumListP->size()) {
+            std::get<IntegerVector>((*headerM)["precursorScanNum"]).push_back(
+                    getAcquisitionNumber(file, precursor.spectrumID, precursorIndex));
+        } else {
+            std::get<IntegerVector>((*headerM)["precursorScanNum"]).push_back(-1);
+        }
+        const auto &selectedIon = !precursor.selectedIons.empty() ? precursor.selectedIons[0]
+                                                                  : pwiz::msdata::SelectedIon{};
+        std::get<NumericVector>((*headerM)["precursorMZ"]).push_back(
+                selectedIon.cvParam(pwiz::cv::MS_selected_ion_m_z).value.empty()
+                ? selectedIon.cvParam(pwiz::cv::MS_m_z).valueAs<double>()
+                : selectedIon.cvParam(pwiz::cv::MS_selected_ion_m_z).valueAs<double>());
+        std::get<IntegerVector>((*headerM)["precursorCharge"]).push_back(
+                selectedIon.cvParam(pwiz::cv::MS_charge_state).valueAs<int>());
+        std::get<NumericVector>((*headerM)["precursorIntensity"]).push_back(
+                selectedIon.cvParam(pwiz::cv::MS_peak_intensity).valueAs<double>());
 
-            auto iwin = !SpectrumP->precursors.empty() ? SpectrumP->precursors[0].isolationWindow : pwiz::msdata::IsolationWindow{};
-                std::get<NumericVector>((*headerM)["isolationWindowTargetMZ"]).push_back(
-                        iwin.cvParam(pwiz::cv::MS_isolation_window_target_m_z).value.empty() ? NAN
-                                                                                             : iwin.cvParam(
-                                pwiz::cv::MS_isolation_window_target_m_z).valueAs<double>());
-                std::get<NumericVector>((*headerM)["isolationWindowLowerOffset"]).push_back(
-                        iwin.cvParam(pwiz::cv::MS_isolation_window_lower_offset).value.empty() ? NAN
-                                                                                               : iwin.cvParam(
-                                pwiz::cv::MS_isolation_window_lower_offset).valueAs<double>());
-                std::get<NumericVector>((*headerM)["isolationWindowUpperOffset"]).push_back(
-                        iwin.cvParam(pwiz::cv::MS_isolation_window_upper_offset).value.empty() ? NAN
-                                                                                               : iwin.cvParam(
-                                pwiz::cv::MS_isolation_window_upper_offset).valueAs<double>());
+        auto iwin = !SpectrumP->precursors.empty() ? SpectrumP->precursors[0].isolationWindow
+                                                   : pwiz::msdata::IsolationWindow{};
+        std::get<NumericVector>((*headerM)["isolationWindowTargetMZ"]).push_back(
+                iwin.cvParam(pwiz::cv::MS_isolation_window_target_m_z).value.empty() ? NAN
+                                                                                     : iwin.cvParam(
+                        pwiz::cv::MS_isolation_window_target_m_z).valueAs<double>());
+        std::get<NumericVector>((*headerM)["isolationWindowLowerOffset"]).push_back(
+                iwin.cvParam(pwiz::cv::MS_isolation_window_lower_offset).value.empty() ? NAN
+                                                                                       : iwin.cvParam(
+                        pwiz::cv::MS_isolation_window_lower_offset).valueAs<double>());
+        std::get<NumericVector>((*headerM)["isolationWindowUpperOffset"]).push_back(
+                iwin.cvParam(pwiz::cv::MS_isolation_window_upper_offset).value.empty() ? NAN
+                                                                                       : iwin.cvParam(
+                        pwiz::cv::MS_isolation_window_upper_offset).valueAs<double>());
     }
     auto cMap = new Header;
-    cMap->names = new const char*[(*headerM).size()];
+    cMap->names = new const char *[(*headerM).size()];
     cMap->values = new const void *[(*headerM).size()];
-    cMap->numCols =0;
+    cMap->numCols = 0;
     cMap->numRows = std::get<IntegerVector>((*headerM)["seqNum"]).size();
     cMap->error = "";
-    for(const auto& [key,value] : (*headerM)){
+    for (const auto &[key, value]: (*headerM)) {
         cMap->names[cMap->numCols] = key.c_str();
-        std::visit([key,&cMap](auto&& arg){
-            if(arg.size() != cMap->numRows) {
-                cMap->error = (std::string("ColSize does not match: ")+key+" : " + std::to_string(arg.size())+"/"+std::to_string(cMap->numRows)).c_str();
+        std::visit([key, &cMap](auto &&arg) {
+            if (arg.size() != cMap->numRows) {
+                cMap->error = (std::string("ColSize does not match: ") + key + " : " + std::to_string(arg.size()) +
+                               "/" + std::to_string(cMap->numRows)).c_str();
             }
-            cMap->values[cMap->numCols++] = arg.data();},value);
-        ;
+            cMap->values[cMap->numCols++] = arg.data();
+        }, value);;
     };
-    if((*headerM).size() != cMap->numCols) {
-        cMap->error = (std::string("ColSize does not match header: ") + std::to_string(cMap->numCols)+"/"+std::to_string((*headerM).size())).c_str();
+    if ((*headerM).size() != cMap->numCols) {
+        cMap->error = (std::string("ColSize does not match header: ") + std::to_string(cMap->numCols) + "/" +
+                       std::to_string((*headerM).size())).c_str();
     }
     return *cMap;
 }
 
-int getAcquisitionNumber(MSDataFile file,std::string id, size_t index)
-{
-  // const SpectrumIdentity& si = msd->run.spectrumListPtr->spectrumIdentity(index);
-  auto scanNumber = pwiz::msdata::id::translateNativeIDToScanNumber(pwiz::msdata::id::getDefaultNativeIDFormat(*(pwiz::msdata::MSDataFile *)file), id);
-  if (scanNumber.empty())
-    return static_cast<int>(index) + 1;
-  else
-    return boost::lexical_cast<int>(scanNumber);
+ChromatogramInfo *getChromatogramInfo(MSDataFile file, int chromIdx) {
+    auto ffile = (pwiz::msdata::MSDataFile *) file;
+    auto info = new ChromatogramInfo{};
+    auto chromListPtr = ffile->run.chromatogramListPtr;
+    if (chromListPtr.get() == 0) {
+        info->error = "The direct support for chromatogram info is only available in mzML format.";
+        return info;
+    } else if (chromListPtr->size() == 0) {
+        info->error = "No available chromatogram info.";
+        return info;
+    } else if ((chromIdx < 0) || (chromIdx > chromListPtr->size())) {
+        info->error = "Index whichChrom out of bounds [0 ... %d].\n", (chromListPtr->size()) - 1;
+        return info;
+    } else {
+        auto time = new std::vector<double>{};
+        auto intensity = new std::vector<double>{};
+        auto chrom = chromListPtr->chromatogram(chromIdx, true);
+        std::vector<pwiz::msdata::TimeIntensityPair> pairs;
+        chrom->getTimeIntensityPairs(pairs);
+
+        for (int i = 0; i < pairs.size(); i++) {
+            auto p = pairs.at(i);
+            time->push_back(p.time);
+            intensity->push_back(p.intensity);
+        }
+        info->time = time->data();
+        info->intensity = intensity->data();
+        info->id = chrom->id.c_str();
+        info->size = pairs.size();
+    }
+    return info;
+}
+
+Header *getChromatogramHeaderInfo(MSDataFile file, const int *scans, int scansSize) {
+    auto ffile = (pwiz::msdata::MSDataFile *) file;
+
+    auto cInfo = new Header{};
+    // CVID nativeIdFormat_ = id::getDefaultNativeIDFormat(*msd);
+    auto clp = ffile->run.chromatogramListPtr;
+    if (clp.get() == 0) {
+        cInfo->error = "The direct support for chromatogram cInfo is only available in mzML format.";
+        return cInfo;
+    } else if (clp->size() == 0) {
+        cInfo->error = "No available chromatogram cInfo.";
+        return cInfo;
+    }
+    auto *infoM = new HeaderMap{
+            {"chromatogramId",                      StringVector(scansSize)},
+            {"chromatogramIndex",                   IntegerVector(scansSize)},
+            {"polarity",                            IntegerVector(scansSize)},
+            {"precursorIsolationWindowTargetMZ",    NumericVector(scansSize)},
+            {"precursorIsolationWindowLowerOffset", NumericVector(scansSize)},
+            {"precursorIsolationWindowUpperOffset", NumericVector(scansSize)},
+            {"precursorCollisionEnergy",            NumericVector(scansSize)},
+            {"productIsolationWindowTargetMZ",      NumericVector(scansSize)},
+            {"productIsolationWindowLowerOffset",   NumericVector(scansSize)},
+            {"productIsolationWindowUpperOffset",   NumericVector(scansSize)},
+    };
+    for (int i = 0; i < scansSize; i++) {
+        int current_chrom = scans[i];
+        if (current_chrom < 0 || current_chrom > clp->size()) {
+            cInfo->error = "Provided index out of bounds.";
+            return cInfo;
+        }
+        auto ch = clp->chromatogram(current_chrom, false);
+        std::get<StringVector>((*infoM)["chromatogramId"])[i] = ch->id;
+        std::get<IntegerVector>((*infoM)["chromatogramIndex"])[i] = current_chrom;
+        auto param = ch->cvParamChild(pwiz::cv::MS_scan_polarity);
+        std::get<IntegerVector>((*infoM)["polarity"])[i] = (param.cvid == pwiz::cv::MS_negative_scan ? 0 : (
+                param.cvid == pwiz::cv::MS_positive_scan ? +1 : -1));
+        if (!ch->precursor.empty()) {
+            std::get<NumericVector>(
+                    (*infoM)["precursorIsolationWindowTargetMZ"])[i] = ch->precursor.isolationWindow.cvParam(
+                    pwiz::cv::MS_isolation_window_target_m_z).value.empty() ? NAN
+                                                                            : ch->precursor.isolationWindow.cvParam(
+                            pwiz::cv::MS_isolation_window_target_m_z).valueAs<double>();
+            std::get<NumericVector>(
+                    (*infoM)["precursorIsolationWindowLowerOffset"])[i] = ch->precursor.isolationWindow.cvParam(
+                    pwiz::cv::MS_isolation_window_lower_offset).value.empty() ? NAN
+                                                                              : ch->precursor.isolationWindow.cvParam(
+                            pwiz::cv::MS_isolation_window_lower_offset).valueAs<double>();
+            std::get<NumericVector>(
+                    (*infoM)["precursorIsolationWindowUpperOffset"])[i] = ch->precursor.isolationWindow.cvParam(
+                    pwiz::cv::MS_isolation_window_upper_offset).value.empty() ? NAN
+                                                                              : ch->precursor.isolationWindow.cvParam(
+                            pwiz::cv::MS_isolation_window_upper_offset).valueAs<double>();
+            std::get<NumericVector>((*infoM)["precursorCollisionEnergy"])[i] = ch->precursor.activation.cvParam(
+                    pwiz::cv::MS_collision_energy).value.empty() ? NAN : ch->precursor.activation.cvParam(
+                    pwiz::cv::MS_collision_energy).valueAs<double>();
+        } else {
+            std::get<NumericVector>((*infoM)["precursorIsolationWindowTargetMZ"])[i] = NAN;
+            std::get<NumericVector>((*infoM)["precursorIsolationWindowLowerOffset"])[i] = NAN;
+            std::get<NumericVector>((*infoM)["precursorIsolationWindowUpperOffset"])[i] = NAN;
+            std::get<NumericVector>((*infoM)["precursorCollisionEnergy"])[i] = NAN;
+        }
+        if (!ch->product.empty()) {
+            std::get<NumericVector>(
+                    (*infoM)["productIsolationWindowTargetMZ"])[i] = ch->product.isolationWindow.cvParam(
+                    pwiz::cv::MS_isolation_window_target_m_z).value.empty() ? NAN : ch->product.isolationWindow.cvParam(
+                    pwiz::cv::MS_isolation_window_target_m_z).valueAs<double>();
+            std::get<NumericVector>(
+                    (*infoM)["productIsolationWindowLowerOffset"])[i] = ch->product.isolationWindow.cvParam(
+                    pwiz::cv::MS_isolation_window_lower_offset).value.empty() ? NAN
+                                                                              : ch->product.isolationWindow.cvParam(
+                            pwiz::cv::MS_isolation_window_lower_offset).valueAs<double>();
+            std::get<NumericVector>(
+                    (*infoM)["productIsolationWindowUpperOffset"])[i] = ch->product.isolationWindow.cvParam(
+                    pwiz::cv::MS_isolation_window_upper_offset).value.empty() ? NAN
+                                                                              : ch->product.isolationWindow.cvParam(
+                            pwiz::cv::MS_isolation_window_upper_offset).valueAs<double>();
+        } else {
+            std::get<NumericVector>((*infoM)["productIsolationWindowTargetMZ"])[i] = NAN;
+            std::get<NumericVector>((*infoM)["productIsolationWindowLowerOffset"])[i] = NAN;
+            std::get<NumericVector>((*infoM)["productIsolationWindowUpperOffset"])[i] = NAN;
+        }
+    }
+    cInfo->names = new const char *[(*infoM).size()];
+    cInfo->values = new const void *[(*infoM).size()];
+    cInfo->numCols = 0;
+    cInfo->numRows = std::get<StringVector>((*infoM)["chromatogramId"]).size();
+    cInfo->error = "";
+    for (const auto &[key, value]: (*infoM)) {
+        cInfo->names[cInfo->numCols] = key.c_str();
+        std::visit([key, &cInfo](auto &&arg) {
+            if (arg.size() != cInfo->numRows) {
+                cInfo->error = (std::string("ColSize does not match: ") + key + " : " + std::to_string(arg.size()) +
+                                "/" + std::to_string(cInfo->numRows)).c_str();
+            }
+            cInfo->values[cInfo->numCols++] = arg.data();
+        }, value);;
+    };
+    if ((*infoM).size() != cInfo->numCols) {
+        cInfo->error = (std::string("ColSize does not match header: ") + std::to_string(cInfo->numCols) + "/" +
+                        std::to_string((*infoM).size())).c_str();
+    }
+
+    return cInfo;
+}
+
+int getAcquisitionNumber(MSDataFile file, std::string id, size_t index) {
+    // const SpectrumIdentity& si = msd->run.spectrumListPtr->spectrumIdentity(index);
+    auto scanNumber = pwiz::msdata::id::translateNativeIDToScanNumber(
+            pwiz::msdata::id::getDefaultNativeIDFormat(*(pwiz::msdata::MSDataFile *) file), id);
+    if (scanNumber.empty())
+        return static_cast<int>(index) + 1;
+    else
+        return boost::lexical_cast<int>(scanNumber);
 }
 
