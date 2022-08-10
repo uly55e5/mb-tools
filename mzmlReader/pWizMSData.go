@@ -8,6 +8,7 @@ import "C"
 //#define _GLIBCXX_USE_CXX11_ABI 0
 import "C"
 import (
+	"errors"
 	"github.com/uly55e5/readMZmlGo/common"
 	"reflect"
 	"strings"
@@ -15,14 +16,14 @@ import (
 )
 
 type InstrumentInfo struct {
-	manufacturer string
-	model        string
-	ionisation   string
-	analyzer     string
-	detector     string
-	software     string
-	sample       string
-	source       string
+	Manufacturer string
+	Mmodel       string
+	Ionisation   string
+	Analyzer     string
+	Detector     string
+	Software     string
+	Sample       string
+	Source       string
 }
 
 type HeaderInfo struct {
@@ -74,8 +75,8 @@ type ChromatogramHeaderInfo struct {
 
 type Chromatogram struct {
 	Id        string
-	time      []float64
-	intensity []float64
+	Time      []float64
+	Intensity []float64
 }
 
 type MSData struct {
@@ -85,25 +86,25 @@ type MSData struct {
 }
 
 type IsolationWindow struct {
-	high float64
-	low  float64
+	High float64
+	Low  float64
 }
 
 type PeakCount struct {
-	count []int
-	scans []int
+	Count []int
+	Scans []int
 }
 
 type Map3D [][]float64
 
 type RunInfo struct {
-	scanCount      int
-	lowMz          float64
-	highMz         float64
-	dStartTime     float64
-	dEndTime       float64
-	msLevels       []int
-	startTimeStamp string
+	ScanCount      int
+	LowMz          float64
+	HighMz         float64
+	DStartTime     float64
+	DEndTime       float64
+	MsLevels       []int
+	StartTimeStamp string
 }
 
 type PeakList struct {
@@ -112,11 +113,15 @@ type PeakList struct {
 	Scans    []int
 }
 
-func OpenMSData(fileName string) *MSData {
+func OpenMSData(fileName string) (*MSData, error) {
+	cMsData := C.MSDataOpenFile(C.CString(fileName))
+	if cMsData == nil {
+		return nil, errors.New("Could not open file.")
+	}
 	var file MSData
+	file.msData = cMsData
 	file.fileName = fileName
-	file.msData = C.MSDataOpenFile(C.CString(fileName))
-	return &file
+	return &file, nil
 }
 
 func (data *MSData) CloseMSData() {
@@ -131,14 +136,14 @@ func (data *MSData) InstrumentInfo() *InstrumentInfo {
 	if data.instrumentInfo == nil {
 		cinfo := C.getInstrumentInfo(data.msData)
 		info := InstrumentInfo{}
-		info.manufacturer = C.GoString(cinfo.manufacturer)
-		info.model = C.GoString(cinfo.model)
-		info.ionisation = C.GoString(cinfo.ionisation)
-		info.analyzer = C.GoString(cinfo.analyzer)
-		info.detector = C.GoString(cinfo.detector)
-		info.software = C.GoString(cinfo.software)
-		info.sample = C.GoString(cinfo.sample)
-		info.source = C.GoString(cinfo.source)
+		info.Manufacturer = C.GoString(cinfo.manufacturer)
+		info.Mmodel = C.GoString(cinfo.model)
+		info.Ionisation = C.GoString(cinfo.ionisation)
+		info.Analyzer = C.GoString(cinfo.analyzer)
+		info.Detector = C.GoString(cinfo.detector)
+		info.Software = C.GoString(cinfo.software)
+		info.Sample = C.GoString(cinfo.sample)
+		info.Source = C.GoString(cinfo.source)
 		data.instrumentInfo = &info
 	}
 	return data.instrumentInfo
@@ -147,14 +152,14 @@ func (data *MSData) InstrumentInfo() *InstrumentInfo {
 func (data *MSData) GetRunInfo() RunInfo {
 	header := data.Header()
 	var runInfo = RunInfo{}
-	runInfo.scanCount = data.Length()
-	runInfo.lowMz = common.Min(header.LowMZ)
-	runInfo.highMz = common.Max(header.HighMZ)
-	runInfo.dStartTime = common.Min(header.RetentionTime)
-	runInfo.dEndTime = common.Max(header.RetentionTime)
-	runInfo.msLevels = common.Unique(header.MsLevel)
+	runInfo.ScanCount = data.Length()
+	runInfo.LowMz = common.Min(header.LowMZ)
+	runInfo.HighMz = common.Max(header.HighMZ)
+	runInfo.DStartTime = common.Min(header.RetentionTime)
+	runInfo.DEndTime = common.Max(header.RetentionTime)
+	runInfo.MsLevels = common.Unique(header.MsLevel)
 	timeStamp := C.getRunStartTimeStamp(data.msData)
-	runInfo.startTimeStamp = C.GoString(timeStamp)
+	runInfo.StartTimeStamp = C.GoString(timeStamp)
 	return runInfo
 }
 
@@ -167,54 +172,54 @@ func (data *MSData) Analyzer() string {
 	if data.instrumentInfo == nil {
 		data.InstrumentInfo()
 	}
-	return data.instrumentInfo.analyzer
+	return data.instrumentInfo.Analyzer
 }
 
 func (data *MSData) Detector() string {
 	data.InstrumentInfo()
-	return data.instrumentInfo.detector
+	return data.instrumentInfo.Detector
 }
 
 func (data *MSData) Ionisation() string {
 	if data.instrumentInfo == nil {
 		data.InstrumentInfo()
 	}
-	return data.instrumentInfo.ionisation
+	return data.instrumentInfo.Ionisation
 }
 
 func (data *MSData) Manufacturer() string {
 	if data.instrumentInfo == nil {
 		data.InstrumentInfo()
 	}
-	return data.instrumentInfo.manufacturer
+	return data.instrumentInfo.Manufacturer
 }
 
 func (data *MSData) Model() string {
 	if data.instrumentInfo == nil {
 		data.InstrumentInfo()
 	}
-	return data.instrumentInfo.model
+	return data.instrumentInfo.Mmodel
 }
 
 func (data *MSData) SampleInfo() string {
 	if data.instrumentInfo == nil {
 		data.InstrumentInfo()
 	}
-	return data.instrumentInfo.sample
+	return data.instrumentInfo.Sample
 }
 
 func (data *MSData) SoftwareInfo() string {
 	if data.instrumentInfo == nil {
 		data.InstrumentInfo()
 	}
-	return data.instrumentInfo.software
+	return data.instrumentInfo.Software
 }
 
 func (data *MSData) SourceInfo() string {
 	if data.instrumentInfo == nil {
 		data.InstrumentInfo()
 	}
-	return data.instrumentInfo.source
+	return data.instrumentInfo.Source
 }
 
 func (data *MSData) Header(scans ...int) HeaderInfo {
@@ -315,9 +320,9 @@ func (data *MSData) Spectra(scans ...int) PeakList {
 func (data *MSData) PeaksCount(scans ...int) PeakCount {
 	peaks := data.Peaks(scans...)
 	peakCount := PeakCount{}
-	peakCount.scans = scans
+	peakCount.Scans = scans
 	for i := range peaks.Values {
-		peakCount.count = append(peakCount.count, len(peaks.Values[i][0]))
+		peakCount.Count = append(peakCount.Count, len(peaks.Values[i][0]))
 	}
 	return peakCount
 }
@@ -363,8 +368,8 @@ func (data *MSData) TIC() Chromatogram {
 func (data *MSData) Chromatogram(chromIdx int) Chromatogram {
 	cInfo := C.getChromatogramInfo(data.msData, C.int(chromIdx))
 	var chromatogram = Chromatogram{}
-	chromatogram.intensity = cArray2GoSliceDouble(cInfo.intensity, int(cInfo.size))
-	chromatogram.time = cArray2GoSliceDouble(cInfo.time, int(cInfo.size))
+	chromatogram.Intensity = cArray2GoSliceDouble(cInfo.intensity, int(cInfo.size))
+	chromatogram.Time = cArray2GoSliceDouble(cInfo.time, int(cInfo.size))
 	chromatogram.Id = C.GoString(cInfo.id)
 	var errorM string = C.GoString(cInfo.error)
 	if errorM != "" {
