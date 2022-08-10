@@ -238,8 +238,8 @@ func TestMSData_Header(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			if got := tt.msdata.HeaderForScans(tt.args.scans); !cmp.Equal(got, tt.want, nanEqualOpt) {
-				t.Errorf("HeaderForScans() = %v, want %v", got, tt.want)
+			if got := tt.msdata.Header(tt.args.scans...); !cmp.Equal(got, tt.want, nanEqualOpt) {
+				t.Errorf("Header() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -271,7 +271,7 @@ func TestMSData_ChromatogramHeader(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.msdata.ChromatogramHeader(tt.args.scans); !cmp.Equal(got, tt.want, nanEqualOpt) {
+			if got := tt.msdata.ChromatogramHeader(tt.args.scans...); !cmp.Equal(got, tt.want, nanEqualOpt) {
 				t.Errorf("ChromatogramHeader() = %v, want %v", got, tt.want)
 			}
 		})
@@ -316,7 +316,7 @@ func TestMSData_IsolationWindow(t *testing.T) {
 		want   []IsolationWindow
 	}{
 		{"small.pwiz", file, args{false}, result},
-		{"small.pwiz.unique", file, args{true}, []IsolationWindow{{0.5, 0.5}}},
+		{"small.pwiz.Unique", file, args{true}, []IsolationWindow{{0.5, 0.5}}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -342,7 +342,7 @@ func TestMSData_Peaks(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.msdata.Peaks(tt.args.scans); !cmp.Equal(got, tt.want) {
+			if got := tt.msdata.Peaks(tt.args.scans...); !cmp.Equal(got, tt.want) {
 				t.Errorf("Peaks() = %v, want %v", got, tt.want)
 			}
 		})
@@ -364,10 +364,9 @@ func TestMSData_PeaksCount(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.msdata.PeaksCount(tt.args.scans); !reflect.DeepEqual(got, tt.want) {
+			if got := tt.msdata.PeaksCount(tt.args.scans...); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("PeakCount() = %v, want %v", got, tt.want)
 			}
-			tt.msdata.PeaksCount(tt.args.scans)
 		})
 	}
 }
@@ -390,7 +389,7 @@ func TestMSData_Get3DMap(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.msdata.Get3DMap(tt.args.scans, tt.args.lowMz, tt.args.highMz, tt.args.resMZ); !reflect.DeepEqual(got, tt.want) {
+			if got := tt.msdata.Get3DMap(tt.args.lowMz, tt.args.highMz, tt.args.resMZ, tt.args.scans...); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Get3DMap() = %v, want %v", got, tt.want)
 			}
 		})
@@ -439,7 +438,7 @@ func TestMSData_Chromatograms(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			if got := tt.msdata.Chromatograms(tt.args.chromIdxs); !reflect.DeepEqual(got, tt.want) {
+			if got := tt.msdata.Chromatograms(tt.args.chromIdxs...); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Chromatograms() = %v, want %v", got, tt.want)
 			}
 		})
@@ -521,7 +520,7 @@ func TestMSData_Spectra(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			file := OpenMSData(tt.fileName)
-			if got := file.Spectra(tt.args.scans); !reflect.DeepEqual(got, tt.want) {
+			if got := file.Spectra(tt.args.scans...); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Spectra() = %v, want %v", got, tt.want)
 			}
 		})
