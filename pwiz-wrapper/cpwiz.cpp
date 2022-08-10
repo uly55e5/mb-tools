@@ -427,6 +427,7 @@ PeakList getPeakList(MSDataFile file, int * scans, int size) {
         result.scanNum = size;
         result.values = new double**[size];
         result.valSizes = new int[size];
+        result.scans = scans;
         for (int i=0; i<size; i++) {
             auto valSize = res[i][0].size();
             result.valSizes[i] = valSize;
@@ -440,4 +441,54 @@ PeakList getPeakList(MSDataFile file, int * scans, int size) {
         }
 
         return result;
+}
+
+
+
+Map3d get3DMap (MSDataFile file, int * scans, int scanSize, double whichMzLow, double whichMzHigh, double resMz )
+{
+        auto ffile = (pwiz::msdata::MSDataFile *) file;
+
+
+      auto slp = ffile->run.spectrumListPtr;
+      double f = 1 / resMz;
+      int low = round(whichMzLow * f);
+      int high = round(whichMzHigh * f);
+      int dmz = high - low + 1;
+
+      Map3d map3d;
+      map3d.values = new double*[scanSize];
+      map3d.scans = scans;
+      map3d.scanSize = scanSize;
+      map3d.valueSize = dmz;
+      for (int i = 0; i < scanSize; i++)
+        {
+          map3d.values[i]=new double[dmz];
+	  for (int j = 0; j < dmz; j++)
+            {
+	      map3d.values[i][j] = 0.0;
+            }
+        }
+
+      int j=0;
+      for (int i = 0; i < scanSize; i++)
+        {
+	  auto s = slp->spectrum(scans[i], pwiz::msdata::DetailLevel_FullData);
+	  std::vector<pwiz::msdata::MZIntensityPair> pairs;
+	  s->getMZIntensityPairs(pairs);
+
+	  for (int k=0; k < pairs.size(); k++)
+            {
+	      auto p = pairs.at(k);
+	      j = round(p.mz * f) - low;
+	      if ((j >= 0) & (j < dmz))
+                {
+		  if (p.intensity > map3d.values[i][j])
+                    {
+		      map3d.values[i][j] = p.intensity;
+                    }
+                }
+            }
+        }
+      return(map3d);
 }

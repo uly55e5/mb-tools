@@ -11,7 +11,6 @@ import (
 	"golang.org/x/exp/constraints"
 	"reflect"
 	"strings"
-	"time"
 	"unsafe"
 )
 
@@ -90,8 +89,42 @@ type IsolationWindow struct {
 	low  float64
 }
 
-func (data *MSData) Get3DMap(scans int, lowMz float64, highMz float64, resMZ float64) {
+type PeakCount struct {
+	count []int
+	scans []int
+}
 
+type Map3D [][]float64
+
+type RunInfo struct {
+	scanCount      int
+	lowMz          float64
+	highMz         float64
+	dStartTime     float64
+	dEndTime       float64
+	msLevels       []int
+	startTimeStamp string
+}
+
+type PeakList struct {
+	Values   [][][]float64
+	ColNames []string
+	Scans    []int
+}
+
+func (data *MSData) Get3DMap(scans []int, lowMz float64, highMz float64, resMZ float64) Map3D {
+	cScans, length := gSlice2CArrayInt(scans)
+	cMap3d := C.get3DMap(data.msData, cScans, C.int(length), C.double(lowMz), C.double(highMz), C.double(resMZ))
+	c3dSlice := []*C.double{}
+	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&c3dSlice))
+	sliceHeader.Cap = int(cMap3d.scanSize)
+	sliceHeader.Len = int(cMap3d.scanSize)
+	sliceHeader.Data = uintptr(unsafe.Pointer(cMap3d.values))
+	var map3D = make(Map3D, int(cMap3d.scanSize))
+	for i := range c3dSlice {
+		map3D[i] = cArray2GoSliceDouble(c3dSlice[i], int(cMap3d.valueSize))
+	}
+	return map3D
 }
 
 func (data *MSData) WriteMSFile(fileName string, format string) {
@@ -136,16 +169,16 @@ func (data *MSData) Detector() string {
 	return data.instrumentInfo.detector
 }
 
-func (data *MSData) Header() *HeaderInfo {
+func (data *MSData) Header() HeaderInfo {
 	size := data.Length()
 	allScans := make([]int, size)
-	for i, _ := range allScans {
+	for i := range allScans {
 		allScans[i] = i
 	}
 	return data.HeaderForScans(allScans)
 }
 
-func (data *MSData) HeaderForScans(scans []int) *HeaderInfo {
+func (data *MSData) HeaderForScans(scans []int) HeaderInfo {
 	cScans, length := gSlice2CArrayInt(scans)
 	cheader := C.getScanHeaderInfo(data.msData, cScans, C.int(length))
 	header := HeaderInfo{}
@@ -153,10 +186,10 @@ func (data *MSData) HeaderForScans(scans []int) *HeaderInfo {
 	errorM := C.GoString(cheader.error)
 	if errorM != "" {
 		println(errorM)
-		return nil
+		return HeaderInfo{}
 	}
 	convertHeaderData(&header, cheader.names, cheader.values, cheader.numCols, cheader.numRows)
-	return &header
+	return header
 }
 
 func convertHeaderData(header interface{}, cNames **C.char, cVals *unsafe.Pointer, numCols C.ulong, numRows C.ulong) {
@@ -197,7 +230,7 @@ func convertHeaderData(header interface{}, cNames **C.char, cVals *unsafe.Pointe
 
 func cArray2GoSliceInt(array *C.int, length int) []int {
 	cSlice := []C.int{}
-	sliceHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cSlice)))
+	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&cSlice))
 	sliceHeader.Cap = length
 	sliceHeader.Len = length
 	sliceHeader.Data = uintptr(unsafe.Pointer(array))
@@ -210,7 +243,7 @@ func cArray2GoSliceInt(array *C.int, length int) []int {
 
 func cArray2GoSliceBool(array *C.char, length int) []bool {
 	cSlice := []C.char{}
-	sliceHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cSlice)))
+	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&cSlice))
 	sliceHeader.Cap = length
 	sliceHeader.Len = length
 	sliceHeader.Data = uintptr(unsafe.Pointer(array))
@@ -223,7 +256,7 @@ func cArray2GoSliceBool(array *C.char, length int) []bool {
 
 func cArray2GoSliceDouble(array *C.double, length int) []float64 {
 	cSlice := []C.double{}
-	sliceHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cSlice)))
+	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&cSlice))
 	sliceHeader.Cap = length
 	sliceHeader.Len = length
 	sliceHeader.Data = uintptr(unsafe.Pointer(array))
@@ -252,55 +285,47 @@ func gSlice2CArrayInt(gSlice []int) (*C.int, int) {
 	return (*C.int)(unsafe.Pointer(sliceHeader.Data)), len(gSlice)
 }
 
-type PeakList struct {
-	values   [][]([]([]float64))
-	colNames []string
-}
-
 func (data *MSData) Peaks(scans []int) PeakList {
 	cScans, scanLen := gSlice2CArrayInt(scans)
 	cPeakList := C.getPeakList(data.msData, cScans, C.int(scanLen))
 	var peakList PeakList
+	peakList.Scans = scans
 	names := cArray2GoSliceStr(cPeakList.colnames, int(cPeakList.colNum))
-	peakList.colNames = names
+	peakList.ColNames = names
 	valSizes := cArray2GoSliceInt(cPeakList.valSizes, int(cPeakList.scanNum))
 	cVals := []**C.double{}
-	sliceHeader := (*reflect.SliceHeader)((unsafe.Pointer(&cVals)))
+	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&cVals))
 	sliceHeader.Cap = int(cPeakList.scanNum)
 	sliceHeader.Len = int(cPeakList.scanNum)
 	sliceHeader.Data = uintptr(unsafe.Pointer(cPeakList.values))
-	peakList.values = make([][][][]float64, int(cPeakList.scanNum))
+	peakList.Values = make([][][]float64, int(cPeakList.scanNum))
 	for i := 0; i < int(cPeakList.scanNum); i++ {
-		peakList.values[i] = make([][][]float64, 2)
+		peakList.Values[i] = make([][]float64, 2)
 		cScanVals := []*C.double{}
-		cScanValsH := (*reflect.SliceHeader)((unsafe.Pointer(&cScanVals)))
+		cScanValsH := (*reflect.SliceHeader)(unsafe.Pointer(&cScanVals))
 		cScanValsH.Cap = int(cPeakList.colNum)
 		cScanValsH.Len = int(cPeakList.colNum)
 		cScanValsH.Data = uintptr(unsafe.Pointer(cVals[i]))
 		mzs := cArray2GoSliceDouble(cScanVals[0], valSizes[i])
 		ints := cArray2GoSliceDouble(cScanVals[1], valSizes[i])
-		peakList.values[i][0] = append(peakList.values[i][0], mzs)
-		peakList.values[i][1] = append(peakList.values[i][1], ints)
+		peakList.Values[i][0] = mzs
+		peakList.Values[i][1] = ints
 	}
 	return peakList
 }
 
-func (data *MSData) Spectra(scans int) {
-
+func (data *MSData) Spectra(scans []int) PeakList {
+	return data.Peaks(scans)
 }
 
-func (data *MSData) PeaksCount(scans int) {
-
-}
-
-type RunInfo struct {
-	scanCount      int
-	lowMz          float64
-	highMz         float64
-	dStartTime     float64
-	dEndTime       float64
-	msLevels       []int
-	startTimeStamp time.Time
+func (data *MSData) PeaksCount(scans []int) PeakCount {
+	peaks := data.Peaks(scans)
+	peakCount := PeakCount{}
+	peakCount.scans = scans
+	for i := range peaks.Values {
+		peakCount.count = append(peakCount.count, len(peaks.Values[i][0]))
+	}
+	return peakCount
 }
 
 func max[T constraints.Ordered](s []T) T {
@@ -352,8 +377,8 @@ func (data *MSData) GetRunInfo() RunInfo {
 	runInfo.dStartTime = min(header.RetentionTime)
 	runInfo.dEndTime = max(header.RetentionTime)
 	runInfo.msLevels = unique(header.MsLevel)
-	//timeStamp = C.getRunSTartTimeStamp(data.msData)
-	//runInfo.startTimeStamp = timeStamp
+	timeStamp := C.getRunStartTimeStamp(data.msData)
+	runInfo.startTimeStamp = C.GoString(timeStamp)
 	return runInfo
 }
 
@@ -378,16 +403,12 @@ func (data *MSData) SourceInfo() string {
 	return data.instrumentInfo.source
 }
 
-func (data *MSData) String() string {
-	return ""
-}
-
 func (data *MSData) IsolationWindow(uniqueVals bool) []IsolationWindow {
 	cWin := C.getIsolationWindow(data.msData)
 	iWin := []IsolationWindow{}
 	high := cArray2GoSliceDouble(cWin.high, int(cWin.size))
 	low := cArray2GoSliceDouble(cWin.low, int(cWin.size))
-	for i, _ := range high {
+	for i := range high {
 		iWin = append(iWin, IsolationWindow{high[i], low[i]})
 	}
 
@@ -397,11 +418,11 @@ func (data *MSData) IsolationWindow(uniqueVals bool) []IsolationWindow {
 	return iWin
 }
 
-func (data *MSData) TIC() *Chromatogram {
+func (data *MSData) TIC() Chromatogram {
 	return data.Chromatogram(0)
 }
 
-func (data *MSData) Chromatogram(chromIdx int) *Chromatogram {
+func (data *MSData) Chromatogram(chromIdx int) Chromatogram {
 	cInfo := C.getChromatogramInfo(data.msData, C.int(chromIdx))
 	var chromatogram = Chromatogram{}
 	chromatogram.intensity = cArray2GoSliceDouble(cInfo.intensity, int(cInfo.size))
@@ -411,23 +432,23 @@ func (data *MSData) Chromatogram(chromIdx int) *Chromatogram {
 	if errorM != "" {
 		println(errorM)
 	}
-	return &chromatogram
+	return chromatogram
 }
 
-func (data *MSData) Chromatograms(chromIdxs []int) []*Chromatogram {
-	var chroms = []*Chromatogram{}
+func (data *MSData) Chromatograms(chromIdxs []int) []Chromatogram {
+	var chroms = []Chromatogram{}
 	for _, idx := range chromIdxs {
 		chroms = append(chroms, data.Chromatogram(idx))
 	}
 	return chroms
 }
 
-func (data *MSData) ChromatogramHeader(scans []int) *ChromatogramHeaderInfo {
+func (data *MSData) ChromatogramHeader(scans []int) ChromatogramHeaderInfo {
 	cScans, length := gSlice2CArrayInt(scans)
 	cheader := C.getChromatogramHeaderInfo(data.msData, cScans, C.int(length))
 	chromInfo := ChromatogramHeaderInfo{}
 	convertHeaderData(&chromInfo, cheader.names, cheader.values, cheader.numCols, cheader.numRows)
-	return &chromInfo
+	return chromInfo
 }
 
 func OpenMSData(fileName string) *MSData {

@@ -46,8 +46,17 @@ typedef  struct {
     int scanNum;
     double *** values;
     int * valSizes;
+    int * scans;
 
 } PeakList;
+
+typedef struct {
+    int * scans;
+    int scanSize;
+    double ** values;
+    int valueSize;
+
+} Map3d;
 
 MSDataFile MSDataOpenFile(const char *fileName);
 //MSDataFile[] MSDataOpenFiles(char** fileNames);
@@ -100,6 +109,8 @@ IsolationWindows *getIsolationWindow(MSDataFile file);
 */
 const char* getRunStartTimeStamp(MSDataFile file);
 PeakList getPeakList(MSDataFile file, int * scans, int size);
+Map3d get3DMap (MSDataFile file, int * scans, int scanSize, double whichMzLow, double whichMzHigh, double resMz );
+
 
 #ifdef __cplusplus
 }

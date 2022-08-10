@@ -198,10 +198,10 @@ func TestMSData_Header(t *testing.T) {
 		name   string
 		msdata *MSData
 		args   args
-		want   *HeaderInfo
+		want   HeaderInfo
 	}{
 		{"small.pwiz", file, args{[]int{0}},
-			&HeaderInfo{
+			HeaderInfo{
 				[]int{0},
 				[]int{1},
 				[]int{1},
@@ -254,9 +254,9 @@ func TestMSData_ChromatogramHeader(t *testing.T) {
 		name   string
 		msdata *MSData
 		args   args
-		want   *ChromatogramHeaderInfo
+		want   ChromatogramHeaderInfo
 	}{
-		{"small.pwiz", file, args{[]int{0}}, &ChromatogramHeaderInfo{
+		{"small.pwiz", file, args{[]int{0}}, ChromatogramHeaderInfo{
 			[]string{"TIC"},
 			[]int{0},
 			[]int{-1},
@@ -287,12 +287,9 @@ func TestMSData_Chromatogram(t *testing.T) {
 		name   string
 		msdata *MSData
 		args   args
-		want   *Chromatogram
+		want   Chromatogram
 	}{
-		{"small.pwiz", file, args{0}, &Chromatogram{
-			"TIC", []float64{0.004935, 0.007896666666666666, 0.011218333333333334, 0.022838333333333332, 0.034925, 0.04862, 0.06192333333333334, 0.075015, 0.07778833333333333, 0.08120333333333334, 0.09290333333333332, 0.10480333333333333, 0.11721500000000001, 0.13002166666666667, 0.14345166666666667, 0.14640833333333333, 0.149755, 0.16144166666666668, 0.17337, 0.18665833333333332, 0.200695, 0.2136733333333333, 0.21674666666666667, 0.22007333333333332, 0.23292333333333332, 0.244745, 0.2591716666666667, 0.2726633333333333, 0.28548333333333337, 0.2888983333333333, 0.3037033333333333, 0.31565, 0.32852666666666663, 0.342915, 0.35855833333333337, 0.36142833333333335, 0.364755, 0.37657833333333335, 0.3886733333333333, 0.40196166666666666, 0.4151316666666667, 0.4284833333333333, 0.4332216666666666, 0.4365666666666667, 0.44832, 0.46056499999999995, 0.47310333333333326, 0.48723666666666665},
-			[]float64{1.5245068e+07, 1.2901166e+07, 586279, 441570.15625, 114331.703125, 130427.3046875, 580561.0625, 1.5148302e+07, 1.0349958e+07, 848427.3125, 456143.4375, 124170.3828125, 104264.796875, 147409.234375, 1.8257344e+07, 1.1037852e+07, 1.102582125e+06, 360250.96875, 125874.828125, 142243.390625, 147414.578125, 1.7613074e+07, 1.5974105e+06, 990298.5, 447647.96875, 71677.03125, 119999.7421875, 152281.25, 2.2136832e+07, 1.243453e+07, 379009.78125, 120473.4296875, 113763.3515625, 73607.4921875, 1.6495375e+07, 6.5487065e+06, 1.04157375e+06, 626711.3125, 109042.7265625, 156294.984375, 79339.078125, 1.2015003e+07, 1.3332331e+07, 925073.25, 419351.46875, 88901.921875, 100616.1953125, 77939.0078125},
-		}},
+		{"small.pwiz", file, args{0}, pwizSmall_Chromatogram_0},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -306,7 +303,7 @@ func TestMSData_Chromatogram(t *testing.T) {
 func TestMSData_IsolationWindow(t *testing.T) {
 	file := OpenMSData("../data/examples/small.pwiz.1.1.mzML")
 	result := make([]IsolationWindow, 34)
-	for i, _ := range result {
+	for i := range result {
 		result[i] = IsolationWindow{0.5, 0.5}
 	}
 	type args struct {
@@ -341,12 +338,209 @@ func TestMSData_Peaks(t *testing.T) {
 		args   args
 		want   PeakList
 	}{
-		{"small.pwiz", file, args{[]int{0}}, PeakList{}},
+		{"small.pwiz", file, args{[]int{0}}, pwizSmall_PeakList_0},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.msdata.Peaks(tt.args.scans); !reflect.DeepEqual(got, tt.want) {
+			if got := tt.msdata.Peaks(tt.args.scans); !cmp.Equal(got, tt.want) {
 				t.Errorf("Peaks() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMSData_PeaksCount(t *testing.T) {
+	file := OpenMSData("../data/examples/small.pwiz.1.1.mzML")
+	type args struct {
+		scans []int
+	}
+	tests := []struct {
+		name   string
+		msdata *MSData
+		args   args
+		want   PeakCount
+	}{
+		{"small.pwiz", file, args{[]int{0}}, PeakCount{[]int{19914}, []int{0}}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.msdata.PeaksCount(tt.args.scans); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("PeakCount() = %v, want %v", got, tt.want)
+			}
+			tt.msdata.PeaksCount(tt.args.scans)
+		})
+	}
+}
+
+func TestMSData_Get3DMap(t *testing.T) {
+	file := OpenMSData("../data/examples/small.pwiz.1.1.mzML")
+	type args struct {
+		scans  []int
+		lowMz  float64
+		highMz float64
+		resMZ  float64
+	}
+	tests := []struct {
+		name   string
+		msdata *MSData
+		args   args
+		want   Map3D
+	}{
+		{"small.pwiz", file, args{[]int{0, 1, 2, 3}, 0, 2000, 0.5}, pwizSmall_3DMap_0_3},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.msdata.Get3DMap(tt.args.scans, tt.args.lowMz, tt.args.highMz, tt.args.resMZ); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Get3DMap() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMSData_GetRunInfo(t *testing.T) {
+	file := OpenMSData("../data/examples/small.pwiz.1.1.mzML")
+	tests := []struct {
+		name   string
+		msdata *MSData
+		want   RunInfo
+	}{
+		{"small.pwiz", file, RunInfo{
+			48,
+			162.24594116210938,
+			2000.0099466203771,
+			0.29610000000000003,
+			29.234199999999998,
+			[]int{1, 2},
+			"2005-07-20T14:44:22",
+		}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.msdata.GetRunInfo(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetRunInfo() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMSData_Chromatograms(t *testing.T) {
+	file := OpenMSData("../data/examples/small.pwiz.1.1.mzML")
+	type args struct {
+		chromIdxs []int
+	}
+	tests := []struct {
+		name   string
+		msdata *MSData
+		args   args
+		want   []Chromatogram
+	}{
+		{"small.pwiz", file, args{[]int{0}}, []Chromatogram{pwizSmall_Chromatogram_0}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			if got := tt.msdata.Chromatograms(tt.args.chromIdxs); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Chromatograms() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMSData_SourceInfo(t *testing.T) {
+	file := OpenMSData("../data/examples/small.pwiz.1.1.mzML")
+
+	tests := []struct {
+		name   string
+		msdata *MSData
+		want   string
+	}{
+		{"small.pwiz", file, ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			if got := tt.msdata.SourceInfo(); got != tt.want {
+				t.Errorf("SourceInfo() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMSData_SampleInfo(t *testing.T) {
+	file := OpenMSData("../data/examples/small.pwiz.1.1.mzML")
+
+	tests := []struct {
+		name   string
+		msdata *MSData
+		want   string
+	}{
+		{"small.pwiz", file, ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			if got := tt.msdata.SampleInfo(); got != tt.want {
+				t.Errorf("SampleInfo() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMSData_SoftwareInfo(t *testing.T) {
+	file := OpenMSData("../data/examples/small.pwiz.1.1.mzML")
+
+	tests := []struct {
+		name   string
+		msdata *MSData
+		want   string
+	}{
+		{"small.pwiz", file, "Xcalibur 1.1 Beta 7"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			if got := tt.msdata.SoftwareInfo(); got != tt.want {
+				t.Errorf("SoftwareInfo() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMSData_Spectra(t *testing.T) {
+	type args struct {
+		scans []int
+	}
+	tests := []struct {
+		name     string
+		fileName string
+		args     args
+		want     PeakList
+	}{
+		{"small.pwiz", pwizSmall_FileName, args{[]int{0}}, pwizSmall_PeakList_0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			file := OpenMSData(tt.fileName)
+			if got := file.Spectra(tt.args.scans); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Spectra() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestMSData_TIC(t *testing.T) {
+	tests := []struct {
+		name     string
+		fileName string
+		want     Chromatogram
+	}{
+		{"small.pwiz", pwizSmall_FileName, pwizSmall_Chromatogram_0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			file := OpenMSData(tt.fileName)
+			if got := file.TIC(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("TIC() = %v, want %v", got, tt.want)
 			}
 		})
 	}
