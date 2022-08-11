@@ -114,8 +114,11 @@ type PeakList struct {
 }
 
 func OpenMSData(fileName string) (*MSData, error) {
-	cMsData := C.MSDataOpenFile(C.CString(fileName))
-	if cMsData == nil {
+	var cErrorMsg *C.char
+	cMsData := C.MSDataOpenFile(C.CString(fileName), &cErrorMsg)
+	if len(C.GoString(cErrorMsg)) > 0 {
+		return nil, errors.New(C.GoString(cErrorMsg))
+	} else if cMsData == nil {
 		return nil, errors.New("Could not open file.")
 	}
 	var file MSData
@@ -289,7 +292,7 @@ func (data *MSData) Peaks(scans ...int) PeakList {
 	cPeakList := C.getPeakList(data.msData, cScans, C.int(scanLen))
 	var peakList PeakList
 	peakList.Scans = scans
-	names := cArray2GoSliceStr(cPeakList.colnames, int(cPeakList.colNum))
+	names := cArray2GoSliceStr(cPeakList.colNames, int(cPeakList.colNum))
 	peakList.ColNames = names
 	valSizes := cArray2GoSliceInt(cPeakList.valSizes, int(cPeakList.scanNum))
 	cVals := []**C.double{}
@@ -343,7 +346,7 @@ func (data *MSData) IsolationWindow(uniqueVals bool) []IsolationWindow {
 }
 
 func (data *MSData) ChromatogramCount() int {
-	cCount := C.getLastChrom(data.msData)
+	cCount := C.getLastChromatogram(data.msData)
 	return int(cCount)
 }
 

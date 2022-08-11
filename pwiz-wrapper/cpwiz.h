@@ -5,61 +5,60 @@
 extern "C" {
 #endif
 typedef void *MSDataFile;
-typedef struct  {
-    const char * manufacturer;
-    const char * model;
-	const char * ionisation;
-	const char * analyzer;
-	const char * detector;
-	const char * software;
-	const char * sample;
-	const char * source;
+typedef struct {
+    const char *manufacturer;
+    const char *model;
+    const char *ionisation;
+    const char *analyzer;
+    const char *detector;
+    const char *software;
+    const char *sample;
+    const char *source;
 } InstrumentInfo;
 
 
 typedef struct {
-    const char** names;
-    const void * * values;
+    const char **names;
+    const void **values;
     long unsigned int numRows;
     long unsigned int numCols;
-    const char * error;
+    const char *error;
 } Header;
 
 typedef struct {
-    double* time;
-    double* intensity;
-    const char * id;
-    const char * error;
+    double *time;
+    double *intensity;
+    const char *id;
+    const char *error;
     long unsigned int size;
 } ChromatogramInfo;
 
 typedef struct {
-    double * high;
-    double * low;
+    double *high;
+    double *low;
     long unsigned int size;
 } IsolationWindows;
 
-typedef  struct {
-    const char * error;
-    const char** colnames;
+typedef struct {
+    const char *error;
+    const char **colNames;
     int colNum;
     int scanNum;
-    double *** values;
-    int * valSizes;
-    int * scans;
+    double ***values;
+    int *valSizes;
+    int *scans;
 
 } PeakList;
 
 typedef struct {
-    int * scans;
+    int *scans;
     int scanSize;
-    double ** values;
+    double **values;
     int valueSize;
 
 } Map3d;
 
-MSDataFile MSDataOpenFile(const char *fileName);
-//MSDataFile[] MSDataOpenFiles(char** fileNames);
+MSDataFile MSDataOpenFile(const char *fileName, const char **errorMessage);
 void MSDataClose(MSDataFile msdata);
 
 //void writeMSfile(const string& filenames, const string& format);
@@ -75,42 +74,26 @@ void MSDataClose(MSDataFile msdata);
          bool rtime_seconds,
          Rcpp::List software_processing);
  */
-//string getFilename();
 
 unsigned long getLastScan(MSDataFile);
 
-int getLastChrom(MSDataFile);
+int getLastChromatogram(MSDataFile);
 
 InstrumentInfo getInstrumentInfo(MSDataFile file);
 
-//Rcpp::List getRunInfo();
-
-/**
- * Reads the scan header for the provided scan(s). Note that this function
- * no longer returns a List, but a DataFrame, even if length whichScan is 1.
- * @return The scan header info is returned as a Rcpp::DataFrame
- **/
-    Header getScanHeaderInfo(MSDataFile file, const int* scans, int size);
+Header getScanHeaderInfo(MSDataFile file, const int *scans, int size);
 
 Header *getChromatogramHeaderInfo(MSDataFile file, const int *scans, int scansSize);
 
-    ChromatogramInfo * getChromatogramInfo(MSDataFile file, int chromIdx);
+ChromatogramInfo *getChromatogramInfo(MSDataFile file, int chromIdx);
 
 IsolationWindows *getIsolationWindow(MSDataFile file);
 
-/*    Rcpp::DataFrame getAllScanHeaderInfo();
+const char *getRunStartTimeStamp(MSDataFile file);
 
-    Rcpp::DataFrame getAllChromatogramHeaderInfo();
+PeakList getPeakList(MSDataFile file, int *scans, int size);
 
-    Rcpp::List getPeakList(Rcpp::IntegerVector whichScan);
-
-    Rcpp::NumericMatrix get3DMap(std::vector<int> scanNumbers, double whichMzLow, double whichMzHigh, double resMz);
-
-*/
-const char* getRunStartTimeStamp(MSDataFile file);
-PeakList getPeakList(MSDataFile file, int * scans, int size);
-Map3d get3DMap (MSDataFile file, int * scans, int scanSize, double whichMzLow, double whichMzHigh, double resMz );
-
+Map3d get3DMap(MSDataFile file, int *scans, int scanSize, double whichMzLow, double whichMzHigh, double resMz);
 
 #ifdef __cplusplus
 }

@@ -17,16 +17,23 @@ typedef std::map<std::string, std::variant<IntegerVector, NumericVector, StringV
 int getAcquisitionNumber(MSDataFile file, std::string id, size_t index);
 
 
-MSDataFile MSDataOpenFile(const char *fileName) {
-    auto ms = new pwiz::msdata::MSDataFile(std::string(fileName));
-    return ms;
+MSDataFile MSDataOpenFile(const char *fileName, const char **errorMessage) {
+    try {
+        auto ms = new pwiz::msdata::MSDataFile(std::string(fileName));
+        return ms;
+    } catch (std::runtime_error e) {
+        *errorMessage = e.what();
+    }
+    return nullptr;
 }
 
 void MSDataClose(MSDataFile file) {
-    delete (pwiz::msdata::MSDataFile *) file;
+    if (file != nullptr) {
+        delete (pwiz::msdata::MSDataFile *) file;
+    }
 }
 
-int getLastChrom(MSDataFile file) {
+int getLastChromatogram(MSDataFile file) {
     auto chromP = ((pwiz::msdata::MSDataFile *) file)->run.chromatogramListPtr;
     return (int) chromP->size();
 }
@@ -396,7 +403,7 @@ PeakList getPeakList(MSDataFile file, int * scans, int size) {
     auto ffile = (pwiz::msdata::MSDataFile *) file;
     PeakList result{};
     const char * names[2] = {"mz","intensity"};
-    result.colnames = names;
+    result.colNames = names;
     result.colNum =2;
 
     auto slp = ffile->run.spectrumListPtr;
