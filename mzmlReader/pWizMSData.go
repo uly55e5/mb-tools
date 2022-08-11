@@ -230,7 +230,8 @@ func (data *MSData) Header(scans ...int) HeaderInfo {
 		scans = getAllScans(data)
 	}
 	cScans, length := gSlice2CArrayInt(scans)
-	cheader := C.getScanHeaderInfo(data.msData, cScans, C.int(length))
+	cheaderPtr := C.getScanHeaderInfo(data.msData, cScans, C.int(length))
+	cheader := *cheaderPtr
 	header := HeaderInfo{}
 
 	errorM := C.GoString(cheader.error)
@@ -289,25 +290,20 @@ func convertHeaderData(header interface{}, cNames **C.char, cVals *unsafe.Pointe
 
 func (data *MSData) Peaks(scans ...int) PeakList {
 	cScans, scanLen := gSlice2CArrayInt(scans)
-	cPeakList := C.getPeakList(data.msData, cScans, C.int(scanLen))
+	cPeakListPtr := C.getPeakList(data.msData, cScans, C.int(scanLen))
+	cPeakList := *cPeakListPtr
 	var peakList PeakList
 	peakList.Scans = scans
 	names := cArray2GoSliceStr(cPeakList.colNames, int(cPeakList.colNum))
 	peakList.ColNames = names
 	valSizes := cArray2GoSliceInt(cPeakList.valSizes, int(cPeakList.scanNum))
-	cVals := []**C.double{}
-	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&cVals))
-	sliceHeader.Cap = int(cPeakList.scanNum)
-	sliceHeader.Len = int(cPeakList.scanNum)
-	sliceHeader.Data = uintptr(unsafe.Pointer(cPeakList.values))
+	var cValsPtr ***C.double = cPeakList.values
+	cVals := unsafe.Slice(cValsPtr, int(cPeakList.scanNum))
 	peakList.Values = make([][][]float64, int(cPeakList.scanNum))
 	for i := 0; i < int(cPeakList.scanNum); i++ {
 		peakList.Values[i] = make([][]float64, 2)
-		cScanVals := []*C.double{}
-		cScanValsH := (*reflect.SliceHeader)(unsafe.Pointer(&cScanVals))
-		cScanValsH.Cap = int(cPeakList.colNum)
-		cScanValsH.Len = int(cPeakList.colNum)
-		cScanValsH.Data = uintptr(unsafe.Pointer(cVals[i]))
+		var cScanValsPtr **C.double = cVals[i]
+		cScanVals := unsafe.Slice(cScanValsPtr, int(cPeakList.colNum))
 		mzs := cArray2GoSliceDouble(cScanVals[0], valSizes[i])
 		ints := cArray2GoSliceDouble(cScanVals[1], valSizes[i])
 		peakList.Values[i][0] = mzs

@@ -19,7 +19,7 @@ typedef struct {
 
 typedef struct {
     const char **names;
-    const void **values;
+    void **values;
     long unsigned int numRows;
     long unsigned int numCols;
     const char *error;
@@ -60,6 +60,13 @@ typedef struct {
 
 MSDataFile MSDataOpenFile(const char *fileName, const char **errorMessage);
 void MSDataClose(MSDataFile msdata);
+void deletePeakList(PeakList* list);
+void delete3DMap(Map3d * map);
+void deleteChromatogramInfo(ChromatogramInfo * info);
+void deleteIsolationWindow(IsolationWindows* windows);
+void deleteHeader(Header*header);
+
+
 
 //void writeMSfile(const string& filenames, const string& format);
 /*void writeSpectrumList(const string& file, const string& format,
@@ -81,7 +88,7 @@ int getLastChromatogram(MSDataFile);
 
 InstrumentInfo getInstrumentInfo(MSDataFile file);
 
-Header getScanHeaderInfo(MSDataFile file, const int *scans, int size);
+Header *getScanHeaderInfo(MSDataFile file, const int *scans, int size);
 
 Header *getChromatogramHeaderInfo(MSDataFile file, const int *scans, int scansSize);
 
@@ -91,7 +98,7 @@ IsolationWindows *getIsolationWindow(MSDataFile file);
 
 const char *getRunStartTimeStamp(MSDataFile file);
 
-PeakList getPeakList(MSDataFile file, int *scans, int size);
+PeakList *getPeakList(MSDataFile file, int *scans, int size);
 
 Map3d get3DMap(MSDataFile file, int *scans, int scanSize, double whichMzLow, double whichMzHigh, double resMz);
 
