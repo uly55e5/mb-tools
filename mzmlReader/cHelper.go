@@ -7,12 +7,22 @@ import (
 )
 
 func cArray2GoSliceInt(array *C.int, length int) []int {
-	cSlice := []C.int{}
+	var cSlice []C.int
 	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&cSlice))
 	sliceHeader.Cap = length
 	sliceHeader.Len = length
 	sliceHeader.Data = uintptr(unsafe.Pointer(array))
-	var gSlice = []int{}
+	var gSlice []int
+	for _, ci := range cSlice {
+		gSlice = append(gSlice, int(ci))
+	}
+	return gSlice
+}
+
+func cArray2GoSliceULongInt(array *C.ulong, length int) []int {
+	var arrayPtr *C.ulong = array
+	cSlice := unsafe.Slice(arrayPtr, length)
+	var gSlice []int
 	for _, ci := range cSlice {
 		gSlice = append(gSlice, int(ci))
 	}
@@ -20,12 +30,12 @@ func cArray2GoSliceInt(array *C.int, length int) []int {
 }
 
 func cArray2GoSliceBool(array *C.char, length int) []bool {
-	cSlice := []C.char{}
+	var cSlice []C.char
 	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&cSlice))
 	sliceHeader.Cap = length
 	sliceHeader.Len = length
 	sliceHeader.Data = uintptr(unsafe.Pointer(array))
-	var gSlice = []bool{}
+	var gSlice []bool
 	for _, ci := range cSlice {
 		gSlice = append(gSlice, uint8(ci) > 0)
 	}
@@ -33,12 +43,12 @@ func cArray2GoSliceBool(array *C.char, length int) []bool {
 }
 
 func cArray2GoSliceDouble(array *C.double, length int) []float64 {
-	cSlice := []C.double{}
+	var cSlice []C.double
 	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&cSlice))
 	sliceHeader.Cap = length
 	sliceHeader.Len = length
 	sliceHeader.Data = uintptr(unsafe.Pointer(array))
-	var gSlice = []float64{}
+	var gSlice []float64
 	for _, ci := range cSlice {
 		gSlice = append(gSlice, float64(ci))
 	}
@@ -47,7 +57,7 @@ func cArray2GoSliceDouble(array *C.double, length int) []float64 {
 
 func cArray2GoSliceStr(array **C.char, length int) []string {
 	cSlice := unsafe.Slice(array, length)
-	var gSlice = []string{}
+	var gSlice []string
 	for _, ci := range cSlice {
 		gSlice = append(gSlice, C.GoString(ci))
 	}
@@ -55,7 +65,7 @@ func cArray2GoSliceStr(array **C.char, length int) []string {
 }
 
 func gSlice2CArrayInt(gSlice []int) (*C.int, int) {
-	var cSlice = []C.int{}
+	var cSlice []C.int
 	for _, gi := range gSlice {
 		cSlice = append(cSlice, C.int(gi))
 	}

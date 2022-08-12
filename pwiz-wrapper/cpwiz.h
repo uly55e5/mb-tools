@@ -2,6 +2,8 @@
 #define __cpwiz_H__
 #define _GLIBCXX_USE_CXX11_ABI 0
 #ifdef __cplusplus
+
+
 extern "C" {
 #endif
 typedef void *MSDataFile;
@@ -18,12 +20,57 @@ typedef struct {
 
 
 typedef struct {
-    const char **names;
-    void **values;
-    long unsigned int numRows;
-    long unsigned int numCols;
-    const char *error;
-} Header;
+    struct {
+        const char **chromatogramId;
+        int *chromatogramIndex;
+        int *polarity;
+        double *precursorIsolationWindowTargetMZ;
+        double *precursorIsolationWindowLowerOffset;
+        double *precursorIsolationWindowUpperOffset;
+        double *precursorCollisionEnergy;
+        double *productIsolationWindowTargetMZ;
+        double *productIsolationWindowLowerOffset;
+        double *productIsolationWindowUpperOffset;
+    } values;
+    int size;
+} ChromatogramHeader;
+
+typedef struct {
+    struct values {
+        int *seqNum;
+        int *acquisitionNum;
+        int *msLevel;
+        int *polarity;
+        int *peaksCount;
+        double *totIonCurrent;
+        double *retentionTime;
+        double *basePeakMZ;
+        double *basePeakIntensity;
+        double *collisionEnergy;
+        double *ionisationEnergy;
+        double *lowMZ;
+        double *highMZ;
+        int *precursorScanNum;
+        double *precursorMZ;
+        int *precursorCharge;
+        double *precursorIntensity;
+        int *mergedScan;
+        int *mergedResultScanNum;
+        int *mergedResultStartScanNum;
+        int *mergedResultEndScanNum;
+        double *ionInjectionTime;
+        const char **filterString;
+        const char **spectrumId;
+        char *centroided;
+        double *ionMobilityDriftTime;
+        double *isolationWindowTargetMZ;
+        double *isolationWindowLowerOffset;
+        double *isolationWindowUpperOffset;
+        double *scanWindowLowerLimit;
+        double *scanWindowUpperLimit;
+    } values;
+    int size;
+} ScanHeader;
 
 typedef struct {
     double *time;
@@ -45,7 +92,7 @@ typedef struct {
     int colNum;
     int scanNum;
     double ***values;
-    int *valSizes;
+    unsigned long int *valSizes;
     int *scans;
 
 } PeakList;
@@ -60,11 +107,12 @@ typedef struct {
 
 MSDataFile MSDataOpenFile(const char *fileName, const char **errorMessage);
 void MSDataClose(MSDataFile msdata);
-void deletePeakList(PeakList* list);
-void delete3DMap(Map3d * map);
-void deleteChromatogramInfo(ChromatogramInfo * info);
-void deleteIsolationWindow(IsolationWindows* windows);
-void deleteHeader(Header*header);
+void deletePeakList(PeakList *list);
+void delete3DMap(Map3d *map);
+void deleteChromatogramInfo(ChromatogramInfo *info);
+void deleteIsolationWindow(IsolationWindows *windows);
+void deleteChromatogramHeader(ChromatogramHeader *header);
+void deleteScanHeader(ScanHeader *header);
 
 
 
@@ -88,9 +136,9 @@ int getLastChromatogram(MSDataFile);
 
 InstrumentInfo getInstrumentInfo(MSDataFile file);
 
-Header *getScanHeaderInfo(MSDataFile file, const int *scans, int size);
+ScanHeader *getScanHeaderInfo(MSDataFile file, const int *scans, int size);
 
-Header *getChromatogramHeaderInfo(MSDataFile file, const int *scans, int scansSize);
+ChromatogramHeader *getChromatogramHeaderInfo(MSDataFile file, const int *scans, int scansSize);
 
 ChromatogramInfo *getChromatogramInfo(MSDataFile file, int chromIdx);
 
@@ -100,7 +148,7 @@ const char *getRunStartTimeStamp(MSDataFile file);
 
 PeakList *getPeakList(MSDataFile file, int *scans, int size);
 
-Map3d get3DMap(MSDataFile file, int *scans, int scanSize, double whichMzLow, double whichMzHigh, double resMz);
+Map3d *get3DMap(MSDataFile file, int *scans, int scanSize, double whichMzLow, double whichMzHigh, double resMz);
 
 #ifdef __cplusplus
 }
