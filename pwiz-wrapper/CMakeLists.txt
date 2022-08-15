@@ -23,7 +23,7 @@ ExternalProject_Add("pwiz"
                     INSTALL_COMMAND ""
                     )
 
-INCLUDE_DIRECTORIES(. ${PWIZ_DIR})
+INCLUDE_DIRECTORIES(. ${PWIZ_DIR} ${PWIZ_DIR}/libraries/boost_1_76_0)
 
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 set(CMAKE_DEBUG_POSTFIX d)
