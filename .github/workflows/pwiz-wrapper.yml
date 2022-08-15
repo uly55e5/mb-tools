@@ -24,8 +24,7 @@ jobs:
 
     - name: Build
       run: |
+        cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
         ls /home/runner/work/mb-tools/mb-tools/pwiz-wrapper/3rdparty/pwiz
         ls /home/runner/work/mb-tools/mb-tools/pwiz-wrapper/3rdparty/pwiz/pwiz/data/msdata/
-        cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-
       
