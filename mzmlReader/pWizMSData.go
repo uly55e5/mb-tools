@@ -9,7 +9,7 @@ import "C"
 import "C"
 import (
 	"errors"
-	"github.com/uly55e5/readMZmlGo/common"
+	"github.com/uly55e5/mb-tools/common"
 	"unsafe"
 )
 

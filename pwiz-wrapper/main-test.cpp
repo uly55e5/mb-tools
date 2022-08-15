@@ -2,9 +2,14 @@
 // Created by david on 04.08.22.
 //
 #include "cpwiz.h"
+#include <iostream>
 
 int main() {
-    auto file = MSDataOpenFile("../data/examples/small.pwiz.1.1.mzML", nullptr);
+    const char* error= "";
+    auto file = MSDataOpenFile("../data/examples/small.pwiz.1.1.mzML", &error);
+    if(error != "") {
+        std::cout << error << std::endl;
+    }
     int scans[] = {0, 1, 2, 3, 4, 5};
     int chroms[] = {0};
     auto scanCount = getLastScan(file);

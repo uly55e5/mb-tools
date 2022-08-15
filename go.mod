@@ -1,4 +1,4 @@
-module github.com/uly55e5/readMZmlGo
+module github.com/uly55e5/mb-tools
 
 go 1.18
 
