@@ -3,15 +3,14 @@ PROJECT(pwiz_wrapper)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 SET(VERBOSE ON)
 SET(PREFIX_3rdParty "../3rdparty")
-SET(PWIZ_DIR "3rdparty/pwiz" )
+SET(PWIZ_DIR "${CMAKE_SOURCE_DIR}/3rdparty/pwiz" )
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 INCLUDE("ExternalProject")
 
 ExternalProject_Add("pwiz"
-                    PREFIX "../3rdparty"
-                    SOURCE_DIR "../3rdparty/pwiz"
+                    SOURCE_DIR "${PWIZ_DIR}"
                     GIT_REPOSITORY "https://github.com/ProteoWizard/pwiz.git"
                     GIT_TAG 8c29d2e30b410d56d7673100373639936630d2cd
                     GIT_SHALLOW ON
