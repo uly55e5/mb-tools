@@ -15,6 +15,7 @@ void deletePeakList(PeakList *list) {
     }
     delete[] list->valSizes;
     delete[] list->values;
+    delete[] list->colNames;
     delete list;
 }
 
@@ -436,8 +437,7 @@ typedef std::vector<std::vector<double>> Matrix;
 PeakList *getPeakList(MSDataFile file, int *scans, int size) {
     auto ffile = (pwiz::msdata::MSDataFile *) file;
     auto result = new PeakList{};
-    const char *names[2] = {"mz", "intensity"};
-    result->colNames = names;
+    result->colNames = new const char*[2]{"mz", "intensity"};
     result->colNum = 2;
 
     auto slp = ffile->run.spectrumListPtr;

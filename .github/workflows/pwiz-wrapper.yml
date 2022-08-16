@@ -28,4 +28,4 @@ jobs:
       with:
         go-version: '1.18'
     
-    - run: CGO_LDFLAGS="-no-pie" go test mzmlReader
+    - run: CGO_LDFLAGS="-no-pie" go test github.com/uly55e5/mb-tools/mzmlReader
