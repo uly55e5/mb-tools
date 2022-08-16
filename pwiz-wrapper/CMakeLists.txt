@@ -12,7 +12,6 @@ INCLUDE("ExternalProject")
 ExternalProject_Add("pwiz"
                     SOURCE_DIR "${PWIZ_DIR}"
                     GIT_REPOSITORY "https://github.com/ProteoWizard/pwiz.git"
-                    GIT_TAG 8c29d2e
                     GIT_SHALLOW ON
                     GIT_PROGRESS ON
                     CONFIGURE_COMMAND ""
