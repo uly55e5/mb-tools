@@ -1,0 +1,297 @@
+openapi: 3.0.3
+info:
+  title: Title
+  description: Title
+  version: 1.0.0
+servers:
+  - url: 'https'
+paths:
+  /file:
+    post:
+      description: Sent a file to the server
+      requestBody:
+        content:
+          application/xml:
+            schema:
+              type: string
+              format: binary
+      responses:
+        200:
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+
+  /msdata/{msDataId}/filename:
+    get:
+      responses:
+        200:
+          description: get filename
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  filename:
+                    type: string
+
+  /msdata/{msDataId}/instrument:
+    get:
+      responses:
+        200:
+          description: get instrument data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /msdata/{msDataId}/instrument/analyzer:
+    get:
+      responses:
+        200:
+          description: get analyzer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  analyzer:
+                    type: string
+
+  /msdata/{msDataId}/instrument/detector:
+    get:
+      responses:
+        200:
+          description: get detector
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detector:
+                    type: string
+
+  /msdata/{msDataId}/instrument/ionisation:
+    get:
+      responses:
+        200:
+          description: get ionisation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ionisation:
+                    type: string
+
+  /msdata/{msDataId}/instrument/manufacturer:
+    get:
+      responses:
+        200:
+          description: get manufacturer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  manufacturer:
+                    type: string
+
+  /msdata/{msDataId}/instrument/model:
+    get:
+      responses:
+        200:
+          description: get model
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  model:
+                    type: string
+
+  /msdata/{msDataId}/instrument/sample:
+    get:
+      responses:
+        200:
+          description: get sample
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sample:
+                    type: string
+
+  /msdata/{msDataId}/instrument/software:
+    get:
+      responses:
+        200:
+          description: get software
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  software:
+                    type: string
+
+  /msdata/{msDataId}/instrument/source:
+    get:
+      responses:
+        200:
+          description: get source
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  source:
+                    type: string
+
+  /msdata/{msDataId}/scans:
+    get:
+      responses:
+        200:
+          description: get scans
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scans:
+                    type: array
+                    items:
+                      type: integer
+
+  /msdata/{msDataId}/scans/{id}/header:
+    get:
+      responses:
+        200:
+          description: get scan header
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /msdata/{msDataId}/scans/{id}/peaks:
+    get:
+      responses:
+        200:
+          description: get peaks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  peaks:
+                    type: array
+                    items:
+                      type: number
+
+  /msdata/{msDataId}/scans/{id}/peaks/count:
+    get:
+      responses:
+        200:
+          description: get peak count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  peakCount:
+                    type: integer
+
+  /msdata/{msDataId}/scans/count:
+    get:
+      responses:
+        200:
+          description: get scan count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scanCount:
+                    type: integer
+
+  /msdata/{msDataId}/IsolationWindow:
+    get:
+      responses:
+        200:
+          description: get isolation windows
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  IsolationWindows:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        low:
+                          type: number
+                        high:
+                          type: number
+
+  /msdata/{msDataId}/chromatograms:
+    get:
+      responses:
+        200:
+          description: get chromatograms
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /msdata/{msDataId}/chromatograms/count:
+    get:
+      responses:
+        200:
+          description: get chromatogram count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chromatogramCount:
+                    type: integer
+
+
+  /msdata/{msDataId}/chromatograms/{id}:
+    get:
+      responses:
+        200:
+          description: get chromatogram
+          content:
+            application/json:
+              schema:
+                type: object
+
+
+  /msdata/{msDataId}/chromatograms/{id}/header:
+    get:
+      responses:
+        200:
+          description: get chromatogram header
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /msdata/{msDataId}/3dmap:
+    get:
+      responses:
+        200:
+          description: get 3D map
+          content:
+            application/json:
+              schema:
+                type: object
+
+
