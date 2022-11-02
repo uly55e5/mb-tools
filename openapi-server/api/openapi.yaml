@@ -12,10 +12,9 @@ paths:
       operationId: postFile
       requestBody:
         content:
-          application/xml:
+          multipart/form-data:
             schema:
-              format: binary
-              type: string
+              $ref: '#/components/schemas/postFile_request'
       responses:
         "200":
           content:
@@ -23,6 +22,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/postFile_200_response'
           description: success
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
   /msdata/{msDataId}/filename:
     get:
       operationId: getFileName
@@ -458,11 +463,31 @@ components:
       schema:
         $ref: '#/components/schemas/chromatogramId'
       style: simple
+  responses:
+    "400":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorMsg'
+      description: error in request
   schemas:
     msDataId:
       type: string
     chromatogramId:
       type: integer
+    errorMsg:
+      properties:
+        errorMsg:
+          type: string
+      type: object
+    postFile_request:
+      properties:
+        filename:
+          type: string
+        file:
+          format: binary
+          type: string
+      type: object
     postFile_200_response:
       example:
         id: id

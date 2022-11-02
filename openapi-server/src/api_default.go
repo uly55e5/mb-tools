@@ -10,7 +10,6 @@
 package mzserver
 
 import (
-	"encoding/json"
 	"net/http"
 	"strings"
 
@@ -19,7 +18,7 @@ import (
 
 // DefaultApiController binds http requests to an api service and writes the service results to the http response
 type DefaultApiController struct {
-	service DefaultApiServicer
+	service      DefaultApiServicer
 	errorHandler ErrorHandler
 }
 
@@ -49,7 +48,7 @@ func NewDefaultApiController(s DefaultApiServicer, opts ...DefaultApiOption) Rou
 
 // Routes returns all the api routes for the DefaultApiController
 func (c *DefaultApiController) Routes() Routes {
-	return Routes{ 
+	return Routes{
 		{
 			"Get3dMap",
 			strings.ToUpper("Get"),
@@ -185,10 +184,10 @@ func (c *DefaultApiController) Routes() Routes {
 	}
 }
 
-// Get3dMap - 
+// Get3dMap -
 func (c *DefaultApiController) Get3dMap(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.Get3dMap(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -200,10 +199,10 @@ func (c *DefaultApiController) Get3dMap(w http.ResponseWriter, r *http.Request) 
 
 }
 
-// GetChromatogramCount - 
+// GetChromatogramCount -
 func (c *DefaultApiController) GetChromatogramCount(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.GetChromatogramCount(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -215,10 +214,10 @@ func (c *DefaultApiController) GetChromatogramCount(w http.ResponseWriter, r *ht
 
 }
 
-// GetChromatogramData - 
+// GetChromatogramData -
 func (c *DefaultApiController) GetChromatogramData(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	chromatogramIdParam, err := parseInt32Parameter(chi.URLParam(r, "chromatogramId"), true)
 	if err != nil {
 		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
@@ -236,10 +235,10 @@ func (c *DefaultApiController) GetChromatogramData(w http.ResponseWriter, r *htt
 
 }
 
-// GetChromatogramHeader - 
+// GetChromatogramHeader -
 func (c *DefaultApiController) GetChromatogramHeader(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	chromatogramIdParam, err := parseInt32Parameter(chi.URLParam(r, "chromatogramId"), true)
 	if err != nil {
 		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
@@ -257,10 +256,10 @@ func (c *DefaultApiController) GetChromatogramHeader(w http.ResponseWriter, r *h
 
 }
 
-// GetChromatograms - 
+// GetChromatograms -
 func (c *DefaultApiController) GetChromatograms(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.GetChromatograms(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -272,10 +271,10 @@ func (c *DefaultApiController) GetChromatograms(w http.ResponseWriter, r *http.R
 
 }
 
-// GetFileName - 
+// GetFileName -
 func (c *DefaultApiController) GetFileName(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.GetFileName(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -287,10 +286,10 @@ func (c *DefaultApiController) GetFileName(w http.ResponseWriter, r *http.Reques
 
 }
 
-// GetInstrumentAnalyzer - 
+// GetInstrumentAnalyzer -
 func (c *DefaultApiController) GetInstrumentAnalyzer(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.GetInstrumentAnalyzer(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -302,10 +301,10 @@ func (c *DefaultApiController) GetInstrumentAnalyzer(w http.ResponseWriter, r *h
 
 }
 
-// GetInstrumentData - 
+// GetInstrumentData -
 func (c *DefaultApiController) GetInstrumentData(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.GetInstrumentData(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -317,10 +316,10 @@ func (c *DefaultApiController) GetInstrumentData(w http.ResponseWriter, r *http.
 
 }
 
-// GetInstrumentDetector - 
+// GetInstrumentDetector -
 func (c *DefaultApiController) GetInstrumentDetector(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.GetInstrumentDetector(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -332,10 +331,10 @@ func (c *DefaultApiController) GetInstrumentDetector(w http.ResponseWriter, r *h
 
 }
 
-// GetInstrumentManufacturer - 
+// GetInstrumentManufacturer -
 func (c *DefaultApiController) GetInstrumentManufacturer(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.GetInstrumentManufacturer(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -347,10 +346,10 @@ func (c *DefaultApiController) GetInstrumentManufacturer(w http.ResponseWriter, 
 
 }
 
-// GetInstrumentModel - 
+// GetInstrumentModel -
 func (c *DefaultApiController) GetInstrumentModel(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.GetInstrumentModel(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -362,10 +361,10 @@ func (c *DefaultApiController) GetInstrumentModel(w http.ResponseWriter, r *http
 
 }
 
-// GetIonisationMethod - 
+// GetIonisationMethod -
 func (c *DefaultApiController) GetIonisationMethod(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.GetIonisationMethod(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -377,10 +376,10 @@ func (c *DefaultApiController) GetIonisationMethod(w http.ResponseWriter, r *htt
 
 }
 
-// GetIsolationWindows - 
+// GetIsolationWindows -
 func (c *DefaultApiController) GetIsolationWindows(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.GetIsolationWindows(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -392,10 +391,10 @@ func (c *DefaultApiController) GetIsolationWindows(w http.ResponseWriter, r *htt
 
 }
 
-// GetSampleData - 
+// GetSampleData -
 func (c *DefaultApiController) GetSampleData(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.GetSampleData(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -407,10 +406,10 @@ func (c *DefaultApiController) GetSampleData(w http.ResponseWriter, r *http.Requ
 
 }
 
-// GetScanCount - 
+// GetScanCount -
 func (c *DefaultApiController) GetScanCount(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.GetScanCount(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -422,10 +421,10 @@ func (c *DefaultApiController) GetScanCount(w http.ResponseWriter, r *http.Reque
 
 }
 
-// GetScanHeader - 
+// GetScanHeader -
 func (c *DefaultApiController) GetScanHeader(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.GetScanHeader(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -437,10 +436,10 @@ func (c *DefaultApiController) GetScanHeader(w http.ResponseWriter, r *http.Requ
 
 }
 
-// GetScanPeakCount - 
+// GetScanPeakCount -
 func (c *DefaultApiController) GetScanPeakCount(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.GetScanPeakCount(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -452,10 +451,10 @@ func (c *DefaultApiController) GetScanPeakCount(w http.ResponseWriter, r *http.R
 
 }
 
-// GetScanPeaks - 
+// GetScanPeaks -
 func (c *DefaultApiController) GetScanPeaks(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.GetScanPeaks(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -467,10 +466,10 @@ func (c *DefaultApiController) GetScanPeaks(w http.ResponseWriter, r *http.Reque
 
 }
 
-// GetScansData - 
+// GetScansData -
 func (c *DefaultApiController) GetScansData(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.GetScansData(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -482,10 +481,10 @@ func (c *DefaultApiController) GetScansData(w http.ResponseWriter, r *http.Reque
 
 }
 
-// GetSoftware - 
+// GetSoftware -
 func (c *DefaultApiController) GetSoftware(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.GetSoftware(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -497,10 +496,10 @@ func (c *DefaultApiController) GetSoftware(w http.ResponseWriter, r *http.Reques
 
 }
 
-// GetSource - 
+// GetSource -
 func (c *DefaultApiController) GetSource(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
-	
+
 	result, err := c.service.GetSource(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -512,16 +511,20 @@ func (c *DefaultApiController) GetSource(w http.ResponseWriter, r *http.Request)
 
 }
 
-// PostFile - 
+// PostFile -
 func (c *DefaultApiController) PostFile(w http.ResponseWriter, r *http.Request) {
-	bodyParam := *os.File{}
-	d := json.NewDecoder(r.Body)
-	d.DisallowUnknownFields()
-	if err := d.Decode(&bodyParam); err != nil {
+	if err := r.ParseMultipartForm(32 << 20); err != nil {
 		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
 		return
 	}
-	result, err := c.service.PostFile(r.Context(), bodyParam)
+	filenameParam := r.FormValue("filename")
+
+	fileParam, err := ReadFormFileToTempFile(r, "file")
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		return
+	}
+	result, err := c.service.PostFile(r.Context(), filenameParam, fileParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)

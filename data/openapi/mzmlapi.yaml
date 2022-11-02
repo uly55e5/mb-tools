@@ -11,6 +11,11 @@ components:
       type: string
     chromatogramId:
       type: integer
+    errorMsg:
+      type: object
+      properties:
+        errorMsg:
+          type: string
 
   parameters:
     msDataId:
@@ -27,6 +32,14 @@ components:
       schema:
         $ref: '#/components/schemas/chromatogramId'
       required: true
+  responses:
+    400:
+      description: error in request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorMsg'
+
 
 paths:
   /file:
@@ -35,10 +48,15 @@ paths:
       description: Sent a file to the server
       requestBody:
         content:
-          application/xml:
+          multipart/form-data:
             schema:
-              type: string
-              format: binary
+              type: object
+              properties:
+                filename:
+                  type: string
+                file:
+                  type: string
+                  format: binary
       responses:
         200:
           description: success
@@ -49,6 +67,8 @@ paths:
                 properties:
                   id:
                     $ref: '#/components/schemas/msDataId'
+        400:
+          $ref: '#/components/responses/400'
 
   /msdata/{msDataId}/filename:
     parameters:
