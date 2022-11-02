@@ -11,9 +11,16 @@ package mzserver
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/uly55e5/mb-tools/mzmlReader"
 	"net/http"
 	"os"
+	"strconv"
+	"time"
+	"unsafe"
 )
 
 // DefaultApiService is a service that implements the logic for the DefaultApiServicer
@@ -106,11 +113,21 @@ func (s *DefaultApiService) GetInstrumentAnalyzer(ctx context.Context, msDataId 
 
 // GetInstrumentData -
 func (s *DefaultApiService) GetInstrumentData(ctx context.Context, msDataId string) (ImplResponse, error) {
+	fileinfo, ok := files[msDataId]
+	if !ok {
+		return Response(http.StatusNotImplemented, nil), errors.New("GetInstrumentData method not implemented")
+	}
+	msdata := fileinfo.msdata
+	info := msdata.InstrumentInfo()
+	var infoMap map[string]interface{}
+	inrec, _ := json.Marshal(info)
+	json.Unmarshal(inrec, &infoMap)
+
 	// TODO - update GetInstrumentData with the required logic for this service method.
 	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
 	//TODO: Uncomment the next line to return response Response(200, map[string]interface{}{}) or use other options such as http.Ok ...
-	//return Response(200, map[string]interface{}{}), nil
+	return Response(200, infoMap), nil
 
 	return Response(http.StatusNotImplemented, nil), errors.New("GetInstrumentData method not implemented")
 }
@@ -249,25 +266,37 @@ func (s *DefaultApiService) GetSoftware(ctx context.Context, msDataId string) (I
 
 // GetSource -
 func (s *DefaultApiService) GetSource(ctx context.Context, msDataId string) (ImplResponse, error) {
+	msdata := files[msDataId].msdata
+	source := msdata.SourceInfo()
 	// TODO - update GetSource with the required logic for this service method.
 	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
 	//TODO: Uncomment the next line to return response Response(200, GetSource200Response{}) or use other options such as http.Ok ...
-	//return Response(200, GetSource200Response{}), nil
+	return Response(200, GetSource200Response{source}), nil
 
 	return Response(http.StatusNotImplemented, nil), errors.New("GetSource method not implemented")
 }
 
+type fileData struct {
+	fileName  string
+	msdata    *mzmlReader.MSData
+	timestamp int64
+	size      uintptr
+}
+
+var files = map[string]fileData{}
+
 // PostFile -
 func (s *DefaultApiService) PostFile(ctx context.Context, filename string, file *os.File) (ImplResponse, error) {
-	// TODO - update PostFile with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, PostFile200Response{}) or use other options such as http.Ok ...
-	//return Response(200, PostFile200Response{}), nil
-
-	//TODO: Uncomment the next line to return response Response(400, ErrorMsg{}) or use other options such as http.Ok ...
-	//return Response(400, ErrorMsg{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("PostFile method not implemented")
+	if filename != "" && file != nil {
+		timestamp := time.Now().Unix()
+		id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(timestamp, 10)+filename)))[:45]
+		msdata, err := mzmlReader.OpenMSData(file.Name())
+		if err != nil {
+			return Response(400, ErrorMsg{"Could not open file"}), nil
+		}
+		files[id] = fileData{filename, msdata, timestamp, unsafe.Sizeof(*msdata)}
+		return Response(200, PostFile200Response{id}), nil
+	}
+	return Response(400, ErrorMsg{"File or filename not submitted"}), nil
 }
