@@ -4,10 +4,34 @@ info:
   description: Title
   version: 1.0.0
 servers:
-  - url: 'https'
+  - url: 'http://localhost:8091'
+components:
+  schemas:
+    msDataId:
+      type: string
+    chromatogramId:
+      type: integer
+
+  parameters:
+    msDataId:
+      in: path
+      name: msDataId
+      description: the identifier for the MS data from mzML file
+      schema:
+        $ref: '#/components/schemas/msDataId'
+      required: true
+    chromatogramId:
+      in: path
+      name: chromatogramId
+      description: the identifier of a chromatogram
+      schema:
+        $ref: '#/components/schemas/chromatogramId'
+      required: true
+
 paths:
   /file:
     post:
+      operationId: postFile
       description: Sent a file to the server
       requestBody:
         content:
@@ -24,10 +48,13 @@ paths:
                 type: object
                 properties:
                   id:
-                    type: string
+                    $ref: '#/components/schemas/msDataId'
 
   /msdata/{msDataId}/filename:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: getFileName
       responses:
         200:
           description: get filename
@@ -39,8 +66,12 @@ paths:
                   filename:
                     type: string
 
+
   /msdata/{msDataId}/instrument:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: getInstrumentData
       responses:
         200:
           description: get instrument data
@@ -50,7 +81,10 @@ paths:
                 type: object
 
   /msdata/{msDataId}/instrument/analyzer:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: getInstrumentAnalyzer
       responses:
         200:
           description: get analyzer
@@ -63,7 +97,10 @@ paths:
                     type: string
 
   /msdata/{msDataId}/instrument/detector:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: getInstrumentDetector
       responses:
         200:
           description: get detector
@@ -76,7 +113,10 @@ paths:
                     type: string
 
   /msdata/{msDataId}/instrument/ionisation:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: getIonisationMethod
       responses:
         200:
           description: get ionisation
@@ -89,7 +129,10 @@ paths:
                     type: string
 
   /msdata/{msDataId}/instrument/manufacturer:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: getInstrumentManufacturer
       responses:
         200:
           description: get manufacturer
@@ -102,7 +145,10 @@ paths:
                     type: string
 
   /msdata/{msDataId}/instrument/model:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: getInstrumentModel
       responses:
         200:
           description: get model
@@ -115,7 +161,10 @@ paths:
                     type: string
 
   /msdata/{msDataId}/instrument/sample:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: getSampleData
       responses:
         200:
           description: get sample
@@ -128,7 +177,10 @@ paths:
                     type: string
 
   /msdata/{msDataId}/instrument/software:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: getSoftware
       responses:
         200:
           description: get software
@@ -141,7 +193,10 @@ paths:
                     type: string
 
   /msdata/{msDataId}/instrument/source:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: getSource
       responses:
         200:
           description: get source
@@ -154,7 +209,10 @@ paths:
                     type: string
 
   /msdata/{msDataId}/scans:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: getScansData
       responses:
         200:
           description: get scans
@@ -169,7 +227,10 @@ paths:
                       type: integer
 
   /msdata/{msDataId}/scans/{id}/header:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: getScanHeader
       responses:
         200:
           description: get scan header
@@ -179,7 +240,10 @@ paths:
                 type: object
 
   /msdata/{msDataId}/scans/{id}/peaks:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: getScanPeaks
       responses:
         200:
           description: get peaks
@@ -194,7 +258,10 @@ paths:
                       type: number
 
   /msdata/{msDataId}/scans/{id}/peaks/count:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: getScanPeakCount
       responses:
         200:
           description: get peak count
@@ -207,7 +274,10 @@ paths:
                     type: integer
 
   /msdata/{msDataId}/scans/count:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: getScanCount
       responses:
         200:
           description: get scan count
@@ -220,7 +290,10 @@ paths:
                     type: integer
 
   /msdata/{msDataId}/IsolationWindow:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: getIsolationWindows
       responses:
         200:
           description: get isolation windows
@@ -240,7 +313,10 @@ paths:
                           type: number
 
   /msdata/{msDataId}/chromatograms:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: getChromatograms
       responses:
         200:
           description: get chromatograms
@@ -250,7 +326,10 @@ paths:
                 type: object
 
   /msdata/{msDataId}/chromatograms/count:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: getChromatogramCount
       responses:
         200:
           description: get chromatogram count
@@ -262,9 +341,12 @@ paths:
                   chromatogramCount:
                     type: integer
 
-
-  /msdata/{msDataId}/chromatograms/{id}:
+  /msdata/{msDataId}/chromatograms/{chromatogramId}:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
+      - $ref: '#/components/parameters/chromatogramId'
     get:
+      operationId: getChromatogramData
       responses:
         200:
           description: get chromatogram
@@ -274,8 +356,12 @@ paths:
                 type: object
 
 
-  /msdata/{msDataId}/chromatograms/{id}/header:
+  /msdata/{msDataId}/chromatograms/{chromatogramId}/header:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
+      - $ref: '#/components/parameters/chromatogramId'
     get:
+      operationId: getChromatogramHeader
       responses:
         200:
           description: get chromatogram header
@@ -285,7 +371,10 @@ paths:
                 type: object
 
   /msdata/{msDataId}/3dmap:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
     get:
+      operationId: get3dMap
       responses:
         200:
           description: get 3D map

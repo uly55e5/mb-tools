@@ -1,0 +1,14 @@
+generatorName: go-server
+output: openapi-server
+apiDocs: true
+modelDocs: true
+apiTests: true
+modelTests: true
+addResponseHeaders: true
+featureCORS: true
+packageName: mzserver
+packageVersion: 0.1.0
+router: chi
+sourceFolder: src
+inputSpec: data/openapi/mzmlapi.yaml
+

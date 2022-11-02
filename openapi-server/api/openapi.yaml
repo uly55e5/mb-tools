@@ -1,0 +1,601 @@
+openapi: 3.0.3
+info:
+  description: Title
+  title: Title
+  version: 1.0.0
+servers:
+- url: http://localhost:8091
+paths:
+  /file:
+    post:
+      description: Sent a file to the server
+      operationId: postFile
+      requestBody:
+        content:
+          application/xml:
+            schema:
+              format: binary
+              type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/postFile_200_response'
+          description: success
+  /msdata/{msDataId}/filename:
+    get:
+      operationId: getFileName
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getFileName_200_response'
+          description: get filename
+  /msdata/{msDataId}/instrument:
+    get:
+      operationId: getInstrumentData
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: get instrument data
+  /msdata/{msDataId}/instrument/analyzer:
+    get:
+      operationId: getInstrumentAnalyzer
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getInstrumentAnalyzer_200_response'
+          description: get analyzer
+  /msdata/{msDataId}/instrument/detector:
+    get:
+      operationId: getInstrumentDetector
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getInstrumentDetector_200_response'
+          description: get detector
+  /msdata/{msDataId}/instrument/ionisation:
+    get:
+      operationId: getIonisationMethod
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getIonisationMethod_200_response'
+          description: get ionisation
+  /msdata/{msDataId}/instrument/manufacturer:
+    get:
+      operationId: getInstrumentManufacturer
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getInstrumentManufacturer_200_response'
+          description: get manufacturer
+  /msdata/{msDataId}/instrument/model:
+    get:
+      operationId: getInstrumentModel
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getInstrumentModel_200_response'
+          description: get model
+  /msdata/{msDataId}/instrument/sample:
+    get:
+      operationId: getSampleData
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getSampleData_200_response'
+          description: get sample
+  /msdata/{msDataId}/instrument/software:
+    get:
+      operationId: getSoftware
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getSoftware_200_response'
+          description: get software
+  /msdata/{msDataId}/instrument/source:
+    get:
+      operationId: getSource
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getSource_200_response'
+          description: get source
+  /msdata/{msDataId}/scans:
+    get:
+      operationId: getScansData
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getScansData_200_response'
+          description: get scans
+  /msdata/{msDataId}/scans/{id}/header:
+    get:
+      operationId: getScanHeader
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: get scan header
+  /msdata/{msDataId}/scans/{id}/peaks:
+    get:
+      operationId: getScanPeaks
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getScanPeaks_200_response'
+          description: get peaks
+  /msdata/{msDataId}/scans/{id}/peaks/count:
+    get:
+      operationId: getScanPeakCount
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getScanPeakCount_200_response'
+          description: get peak count
+  /msdata/{msDataId}/scans/count:
+    get:
+      operationId: getScanCount
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getScanCount_200_response'
+          description: get scan count
+  /msdata/{msDataId}/IsolationWindow:
+    get:
+      operationId: getIsolationWindows
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getIsolationWindows_200_response'
+          description: get isolation windows
+  /msdata/{msDataId}/chromatograms:
+    get:
+      operationId: getChromatograms
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: get chromatograms
+  /msdata/{msDataId}/chromatograms/count:
+    get:
+      operationId: getChromatogramCount
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getChromatogramCount_200_response'
+          description: get chromatogram count
+  /msdata/{msDataId}/chromatograms/{chromatogramId}:
+    get:
+      operationId: getChromatogramData
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      - description: the identifier of a chromatogram
+        explode: false
+        in: path
+        name: chromatogramId
+        required: true
+        schema:
+          $ref: '#/components/schemas/chromatogramId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: get chromatogram
+  /msdata/{msDataId}/chromatograms/{chromatogramId}/header:
+    get:
+      operationId: getChromatogramHeader
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      - description: the identifier of a chromatogram
+        explode: false
+        in: path
+        name: chromatogramId
+        required: true
+        schema:
+          $ref: '#/components/schemas/chromatogramId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: get chromatogram header
+  /msdata/{msDataId}/3dmap:
+    get:
+      operationId: get3dMap
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: get 3D map
+components:
+  parameters:
+    msDataId:
+      description: the identifier for the MS data from mzML file
+      explode: false
+      in: path
+      name: msDataId
+      required: true
+      schema:
+        $ref: '#/components/schemas/msDataId'
+      style: simple
+    chromatogramId:
+      description: the identifier of a chromatogram
+      explode: false
+      in: path
+      name: chromatogramId
+      required: true
+      schema:
+        $ref: '#/components/schemas/chromatogramId'
+      style: simple
+  schemas:
+    msDataId:
+      type: string
+    chromatogramId:
+      type: integer
+    postFile_200_response:
+      example:
+        id: id
+      properties:
+        id:
+          type: string
+      type: object
+    getFileName_200_response:
+      example:
+        filename: filename
+      properties:
+        filename:
+          type: string
+      type: object
+    getInstrumentAnalyzer_200_response:
+      example:
+        analyzer: analyzer
+      properties:
+        analyzer:
+          type: string
+      type: object
+    getInstrumentDetector_200_response:
+      example:
+        detector: detector
+      properties:
+        detector:
+          type: string
+      type: object
+    getIonisationMethod_200_response:
+      example:
+        ionisation: ionisation
+      properties:
+        ionisation:
+          type: string
+      type: object
+    getInstrumentManufacturer_200_response:
+      example:
+        manufacturer: manufacturer
+      properties:
+        manufacturer:
+          type: string
+      type: object
+    getInstrumentModel_200_response:
+      example:
+        model: model
+      properties:
+        model:
+          type: string
+      type: object
+    getSampleData_200_response:
+      example:
+        sample: sample
+      properties:
+        sample:
+          type: string
+      type: object
+    getSoftware_200_response:
+      example:
+        software: software
+      properties:
+        software:
+          type: string
+      type: object
+    getSource_200_response:
+      example:
+        source: source
+      properties:
+        source:
+          type: string
+      type: object
+    getScansData_200_response:
+      example:
+        scans:
+        - 0
+        - 0
+      properties:
+        scans:
+          items:
+            type: integer
+          type: array
+      type: object
+    getScanPeaks_200_response:
+      example:
+        peaks:
+        - 0.8008281904610115
+        - 0.8008281904610115
+      properties:
+        peaks:
+          items:
+            type: number
+          type: array
+      type: object
+    getScanPeakCount_200_response:
+      example:
+        peakCount: 0
+      properties:
+        peakCount:
+          type: integer
+      type: object
+    getScanCount_200_response:
+      example:
+        scanCount: 0
+      properties:
+        scanCount:
+          type: integer
+      type: object
+    getIsolationWindows_200_response_IsolationWindows_inner:
+      example:
+        high: 6.027456183070403
+        low: 0.8008281904610115
+      properties:
+        low:
+          type: number
+        high:
+          type: number
+      type: object
+    getIsolationWindows_200_response:
+      example:
+        IsolationWindows:
+        - high: 6.027456183070403
+          low: 0.8008281904610115
+        - high: 6.027456183070403
+          low: 0.8008281904610115
+      properties:
+        IsolationWindows:
+          items:
+            $ref: '#/components/schemas/getIsolationWindows_200_response_IsolationWindows_inner'
+          type: array
+      type: object
+    getChromatogramCount_200_response:
+      example:
+        chromatogramCount: 0
+      properties:
+        chromatogramCount:
+          type: integer
+      type: object
