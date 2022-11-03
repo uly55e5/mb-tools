@@ -52,14 +52,8 @@ func (c *DefaultApiController) Routes() Routes {
 		{
 			"Get3dMap",
 			strings.ToUpper("Get"),
-			"/msdata/{msDataId}/3dmap",
+			"/msdata/{msDataId}/3dmap/{scanId}",
 			c.Get3dMap,
-		},
-		{
-			"GetChromatogramCount",
-			strings.ToUpper("Get"),
-			"/msdata/{msDataId}/chromatograms/count",
-			c.GetChromatogramCount,
 		},
 		{
 			"GetChromatogramData",
@@ -124,8 +118,14 @@ func (c *DefaultApiController) Routes() Routes {
 		{
 			"GetIsolationWindows",
 			strings.ToUpper("Get"),
-			"/msdata/{msDataId}/IsolationWindow",
+			"/msdata/{msDataId}/IsolationWindows",
 			c.GetIsolationWindows,
+		},
+		{
+			"GetRunData",
+			strings.ToUpper("Get"),
+			"/msdata/{msDataId}/run",
+			c.GetRunData,
 		},
 		{
 			"GetSampleData",
@@ -134,27 +134,15 @@ func (c *DefaultApiController) Routes() Routes {
 			c.GetSampleData,
 		},
 		{
-			"GetScanCount",
-			strings.ToUpper("Get"),
-			"/msdata/{msDataId}/scans/count",
-			c.GetScanCount,
-		},
-		{
 			"GetScanHeader",
 			strings.ToUpper("Get"),
-			"/msdata/{msDataId}/scans/{id}/header",
+			"/msdata/{msDataId}/scan/{scanId}/header",
 			c.GetScanHeader,
-		},
-		{
-			"GetScanPeakCount",
-			strings.ToUpper("Get"),
-			"/msdata/{msDataId}/scans/{id}/peaks/count",
-			c.GetScanPeakCount,
 		},
 		{
 			"GetScanPeaks",
 			strings.ToUpper("Get"),
-			"/msdata/{msDataId}/scans/{id}/peaks",
+			"/msdata/{msDataId}/scan/{scanId}/peaks",
 			c.GetScanPeaks,
 		},
 		{
@@ -186,24 +174,19 @@ func (c *DefaultApiController) Routes() Routes {
 
 // Get3dMap -
 func (c *DefaultApiController) Get3dMap(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
 	msDataIdParam := chi.URLParam(r, "msDataId")
 
-	result, err := c.service.Get3dMap(r.Context(), msDataIdParam)
-	// If an error occurred, encode the error with the status code
+	scanIdParam, err := parseInt64Parameter(chi.URLParam(r, "scanId"), true)
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
 		return
 	}
-	// If no error, encode the body and the result code
-	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
-}
-
-// GetChromatogramCount -
-func (c *DefaultApiController) GetChromatogramCount(w http.ResponseWriter, r *http.Request) {
-	msDataIdParam := chi.URLParam(r, "msDataId")
-
-	result, err := c.service.GetChromatogramCount(r.Context(), msDataIdParam)
+	lowMzParam := query.Get("lowMz")
+	highMzParam := query.Get("highMz")
+	resMzParam := query.Get("resMz")
+	result, err := c.service.Get3dMap(r.Context(), msDataIdParam, scanIdParam, lowMzParam, highMzParam, resMzParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)
@@ -258,9 +241,25 @@ func (c *DefaultApiController) GetChromatogramHeader(w http.ResponseWriter, r *h
 
 // GetChromatograms -
 func (c *DefaultApiController) GetChromatograms(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
 	msDataIdParam := chi.URLParam(r, "msDataId")
 
-	result, err := c.service.GetChromatograms(r.Context(), msDataIdParam)
+	limitParam, err := parseInt64Parameter(query.Get("limit"), false)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		return
+	}
+	pageParam, err := parseInt64Parameter(query.Get("page"), false)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		return
+	}
+	countOnlyParam, err := parseBoolParameter(query.Get("countOnly"))
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+	result, err := c.service.GetChromatograms(r.Context(), msDataIdParam, limitParam, pageParam, countOnlyParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)
@@ -378,9 +377,30 @@ func (c *DefaultApiController) GetIonisationMethod(w http.ResponseWriter, r *htt
 
 // GetIsolationWindows -
 func (c *DefaultApiController) GetIsolationWindows(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
 	msDataIdParam := chi.URLParam(r, "msDataId")
 
-	result, err := c.service.GetIsolationWindows(r.Context(), msDataIdParam)
+	uniqueParam, err := parseBoolParameter(query.Get("unique"))
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+	result, err := c.service.GetIsolationWindows(r.Context(), msDataIdParam, uniqueParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result)
+		return
+	}
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
+
+}
+
+// GetRunData -
+func (c *DefaultApiController) GetRunData(w http.ResponseWriter, r *http.Request) {
+	msDataIdParam := chi.URLParam(r, "msDataId")
+
+	result, err := c.service.GetRunData(r.Context(), msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)
@@ -406,41 +426,17 @@ func (c *DefaultApiController) GetSampleData(w http.ResponseWriter, r *http.Requ
 
 }
 
-// GetScanCount -
-func (c *DefaultApiController) GetScanCount(w http.ResponseWriter, r *http.Request) {
-	msDataIdParam := chi.URLParam(r, "msDataId")
-
-	result, err := c.service.GetScanCount(r.Context(), msDataIdParam)
-	// If an error occurred, encode the error with the status code
-	if err != nil {
-		c.errorHandler(w, r, err, &result)
-		return
-	}
-	// If no error, encode the body and the result code
-	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
-
-}
-
 // GetScanHeader -
 func (c *DefaultApiController) GetScanHeader(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
 
-	result, err := c.service.GetScanHeader(r.Context(), msDataIdParam)
-	// If an error occurred, encode the error with the status code
+	scanIdParam, err := parseInt64Parameter(chi.URLParam(r, "scanId"), true)
 	if err != nil {
-		c.errorHandler(w, r, err, &result)
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
 		return
 	}
-	// If no error, encode the body and the result code
-	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
-}
-
-// GetScanPeakCount -
-func (c *DefaultApiController) GetScanPeakCount(w http.ResponseWriter, r *http.Request) {
-	msDataIdParam := chi.URLParam(r, "msDataId")
-
-	result, err := c.service.GetScanPeakCount(r.Context(), msDataIdParam)
+	result, err := c.service.GetScanHeader(r.Context(), msDataIdParam, scanIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)
@@ -455,7 +451,13 @@ func (c *DefaultApiController) GetScanPeakCount(w http.ResponseWriter, r *http.R
 func (c *DefaultApiController) GetScanPeaks(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
 
-	result, err := c.service.GetScanPeaks(r.Context(), msDataIdParam)
+	scanIdParam, err := parseInt64Parameter(chi.URLParam(r, "scanId"), true)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		return
+	}
+
+	result, err := c.service.GetScanPeaks(r.Context(), msDataIdParam, scanIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)
@@ -468,9 +470,25 @@ func (c *DefaultApiController) GetScanPeaks(w http.ResponseWriter, r *http.Reque
 
 // GetScansData -
 func (c *DefaultApiController) GetScansData(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
 	msDataIdParam := chi.URLParam(r, "msDataId")
 
-	result, err := c.service.GetScansData(r.Context(), msDataIdParam)
+	countOnlyParam, err := parseBoolParameter(query.Get("countOnly"))
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+	limitParam, err := parseInt64Parameter(query.Get("limit"), false)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		return
+	}
+	pageParam, err := parseInt64Parameter(query.Get("page"), false)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		return
+	}
+	result, err := c.service.GetScansData(r.Context(), msDataIdParam, countOnlyParam, limitParam, pageParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)

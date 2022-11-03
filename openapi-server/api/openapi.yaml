@@ -58,7 +58,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
+          description: data not found
   /msdata/{msDataId}/instrument:
     get:
       operationId: getInstrumentData
@@ -89,7 +89,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
+          description: data not found
+  /msdata/{msDataId}/run:
+    get:
+      operationId: getRunData
+      parameters:
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+          description: get run data
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: data not found
   /msdata/{msDataId}/instrument/analyzer:
     get:
       operationId: getInstrumentAnalyzer
@@ -120,7 +151,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
+          description: data not found
   /msdata/{msDataId}/instrument/detector:
     get:
       operationId: getInstrumentDetector
@@ -151,7 +182,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
+          description: data not found
   /msdata/{msDataId}/instrument/ionisation:
     get:
       operationId: getIonisationMethod
@@ -182,7 +213,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
+          description: data not found
   /msdata/{msDataId}/instrument/manufacturer:
     get:
       operationId: getInstrumentManufacturer
@@ -213,7 +244,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
+          description: data not found
   /msdata/{msDataId}/instrument/model:
     get:
       operationId: getInstrumentModel
@@ -244,7 +275,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
+          description: data not found
   /msdata/{msDataId}/instrument/sample:
     get:
       operationId: getSampleData
@@ -275,7 +306,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
+          description: data not found
   /msdata/{msDataId}/instrument/software:
     get:
       operationId: getSoftware
@@ -306,7 +337,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
+          description: data not found
   /msdata/{msDataId}/instrument/source:
     get:
       operationId: getSource
@@ -337,7 +368,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
+          description: data not found
   /msdata/{msDataId}/scans:
     get:
       operationId: getScansData
@@ -350,6 +381,30 @@ paths:
         schema:
           $ref: '#/components/schemas/msDataId'
         style: simple
+      - description: get only the header with item count
+        explode: true
+        in: query
+        name: countOnly
+        required: false
+        schema:
+          $ref: '#/components/schemas/countOnly'
+        style: form
+      - description: items per page
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          $ref: '#/components/schemas/limit'
+        style: form
+      - description: page offset
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          $ref: '#/components/schemas/page'
+        style: form
       responses:
         "200":
           content:
@@ -357,6 +412,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/getScansData_200_response'
           description: get scans
+          headers:
+            X-Total-Count:
+              $ref: '#/components/headers/X-Total-Count'
         "400":
           content:
             application/json:
@@ -368,8 +426,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
-  /msdata/{msDataId}/scans/{id}/header:
+          description: data not found
+  /msdata/{msDataId}/scan/{scanId}/header:
     get:
       operationId: getScanHeader
       parameters:
@@ -380,6 +438,14 @@ paths:
         required: true
         schema:
           $ref: '#/components/schemas/msDataId'
+        style: simple
+      - description: the identifier of the scan
+        explode: false
+        in: path
+        name: scanId
+        required: true
+        schema:
+          $ref: '#/components/schemas/scanId'
         style: simple
       responses:
         "200":
@@ -399,8 +465,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
-  /msdata/{msDataId}/scans/{id}/peaks:
+          description: data not found
+  /msdata/{msDataId}/scan/{scanId}/peaks:
     get:
       operationId: getScanPeaks
       parameters:
@@ -412,6 +478,14 @@ paths:
         schema:
           $ref: '#/components/schemas/msDataId'
         style: simple
+      - description: the identifier of the scan
+        explode: false
+        in: path
+        name: scanId
+        required: true
+        schema:
+          $ref: '#/components/schemas/scanId'
+        style: simple
       responses:
         "200":
           content:
@@ -419,6 +493,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/getScanPeaks_200_response'
           description: get peaks
+          headers:
+            X-Total-Count:
+              $ref: '#/components/headers/X-Total-Count'
         "400":
           content:
             application/json:
@@ -430,70 +507,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
-  /msdata/{msDataId}/scans/{id}/peaks/count:
-    get:
-      operationId: getScanPeakCount
-      parameters:
-      - description: the identifier for the MS data from mzML file
-        explode: false
-        in: path
-        name: msDataId
-        required: true
-        schema:
-          $ref: '#/components/schemas/msDataId'
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/getScanPeakCount_200_response'
-          description: get peak count
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorMsg'
-          description: error in request
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
-  /msdata/{msDataId}/scans/count:
-    get:
-      operationId: getScanCount
-      parameters:
-      - description: the identifier for the MS data from mzML file
-        explode: false
-        in: path
-        name: msDataId
-        required: true
-        schema:
-          $ref: '#/components/schemas/msDataId'
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/getScanCount_200_response'
-          description: get scan count
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorMsg'
-          description: error in request
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
-  /msdata/{msDataId}/IsolationWindow:
+          description: data not found
+  /msdata/{msDataId}/IsolationWindows:
     get:
       operationId: getIsolationWindows
       parameters:
@@ -505,13 +520,26 @@ paths:
         schema:
           $ref: '#/components/schemas/msDataId'
         style: simple
+      - description: get only unique values
+        explode: true
+        in: query
+        name: unique
+        required: false
+        schema:
+          $ref: '#/components/schemas/unique'
+        style: form
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/getIsolationWindows_200_response'
+                items:
+                  $ref: '#/components/schemas/getIsolationWindows_200_response_inner'
+                type: array
           description: get isolation windows
+          headers:
+            X-Total-Count:
+              $ref: '#/components/headers/X-Total-Count'
         "400":
           content:
             application/json:
@@ -523,7 +551,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
+          description: data not found
   /msdata/{msDataId}/chromatograms:
     get:
       operationId: getChromatograms
@@ -536,44 +564,42 @@ paths:
         schema:
           $ref: '#/components/schemas/msDataId'
         style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                type: object
-          description: get chromatograms
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorMsg'
-          description: error in request
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
-  /msdata/{msDataId}/chromatograms/count:
-    get:
-      operationId: getChromatogramCount
-      parameters:
-      - description: the identifier for the MS data from mzML file
-        explode: false
-        in: path
-        name: msDataId
-        required: true
+      - description: items per page
+        explode: true
+        in: query
+        name: limit
+        required: false
         schema:
-          $ref: '#/components/schemas/msDataId'
-        style: simple
+          $ref: '#/components/schemas/limit'
+        style: form
+      - description: page offset
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          $ref: '#/components/schemas/page'
+        style: form
+      - description: get only the header with item count
+        explode: true
+        in: query
+        name: countOnly
+        required: false
+        schema:
+          $ref: '#/components/schemas/countOnly'
+        style: form
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/getChromatogramCount_200_response'
-          description: get chromatogram count
+                items:
+                  type: object
+                type: array
+          description: get chromatograms
+          headers:
+            X-Total-Count:
+              $ref: '#/components/headers/X-Total-Count'
         "400":
           content:
             application/json:
@@ -585,7 +611,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
+          description: data not found
   /msdata/{msDataId}/chromatograms/{chromatogramId}:
     get:
       operationId: getChromatogramData
@@ -624,7 +650,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
+          description: data not found
   /msdata/{msDataId}/chromatograms/{chromatogramId}/header:
     get:
       operationId: getChromatogramHeader
@@ -663,8 +689,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
-  /msdata/{msDataId}/3dmap:
+          description: data not found
+  /msdata/{msDataId}/3dmap/{scanId}:
     get:
       operationId: get3dMap
       parameters:
@@ -676,6 +702,44 @@ paths:
         schema:
           $ref: '#/components/schemas/msDataId'
         style: simple
+      - description: the identifier of the scan
+        explode: false
+        in: path
+        name: scanId
+        required: true
+        schema:
+          $ref: '#/components/schemas/scanId'
+        style: simple
+      - description: lower limit for Mz
+        explode: true
+        in: query
+        name: lowMz
+        required: false
+        schema:
+          default: 0
+          format: double
+          type: number
+        style: form
+      - description: upper limit for Mz
+        explode: true
+        in: query
+        name: highMz
+        required: false
+        schema:
+          default: 5000
+          format: double
+          type: number
+        style: form
+      - description: resolution for Mz
+        explode: true
+        in: query
+        name: resMz
+        required: false
+        schema:
+          default: 1
+          format: double
+          type: number
+        style: form
       responses:
         "200":
           content:
@@ -694,8 +758,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorMsg'
-          description: msdata not found
+          description: data not found
 components:
+  headers:
+    X-Total-Count:
+      explode: false
+      schema:
+        format: int64
+        type: integer
+      style: simple
   parameters:
     msDataId:
       description: the identifier for the MS data from mzML file
@@ -715,6 +786,84 @@ components:
       schema:
         $ref: '#/components/schemas/chromatogramId'
       style: simple
+    scanId:
+      description: the identifier of the scan
+      explode: false
+      in: path
+      name: scanId
+      required: true
+      schema:
+        $ref: '#/components/schemas/scanId'
+      style: simple
+    countOnly:
+      description: get only the header with item count
+      explode: true
+      in: query
+      name: countOnly
+      required: false
+      schema:
+        $ref: '#/components/schemas/countOnly'
+      style: form
+    limit:
+      description: items per page
+      explode: true
+      in: query
+      name: limit
+      required: false
+      schema:
+        $ref: '#/components/schemas/limit'
+      style: form
+    page:
+      description: page offset
+      explode: true
+      in: query
+      name: page
+      required: false
+      schema:
+        $ref: '#/components/schemas/page'
+      style: form
+    unique:
+      description: get only unique values
+      explode: true
+      in: query
+      name: unique
+      required: false
+      schema:
+        $ref: '#/components/schemas/unique'
+      style: form
+    highMz:
+      description: upper limit for Mz
+      explode: true
+      in: query
+      name: highMz
+      required: false
+      schema:
+        default: 5000
+        format: double
+        type: number
+      style: form
+    lowMz:
+      description: lower limit for Mz
+      explode: true
+      in: query
+      name: lowMz
+      required: false
+      schema:
+        default: 0
+        format: double
+        type: number
+      style: form
+    resMz:
+      description: resolution for Mz
+      explode: true
+      in: query
+      name: resMz
+      required: false
+      schema:
+        default: 1
+        format: double
+        type: number
+      style: form
   responses:
     "400":
       content:
@@ -727,18 +876,38 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/errorMsg'
-      description: msdata not found
+      description: data not found
   schemas:
     msDataId:
       type: string
     chromatogramId:
       format: int64
+      minimum: 0
       type: integer
     errorMsg:
       properties:
         errorMsg:
           type: string
       type: object
+    countOnly:
+      type: boolean
+    limit:
+      default: 50
+      format: int64
+      minimum: 1
+      type: integer
+    page:
+      default: 1
+      format: int64
+      minimum: 1
+      type: integer
+    scanId:
+      format: int64
+      minimum: 0
+      type: integer
+    unique:
+      default: false
+      type: boolean
     postFile_request:
       properties:
         filename:
@@ -841,26 +1010,10 @@ components:
             type: number
           type: array
       type: object
-    getScanPeakCount_200_response:
+    getIsolationWindows_200_response_inner_IsolationWindows:
       example:
-        peakCount: 0
-      properties:
-        peakCount:
-          format: int64
-          type: integer
-      type: object
-    getScanCount_200_response:
-      example:
-        scanCount: 0
-      properties:
-        scanCount:
-          format: int64
-          type: integer
-      type: object
-    getIsolationWindows_200_response_IsolationWindows_inner:
-      example:
-        high: 6.027456183070403
-        low: 0.8008281904610115
+        high: 1.4658129805029452
+        low: 6.027456183070403
       properties:
         low:
           format: double
@@ -869,24 +1022,17 @@ components:
           format: double
           type: number
       type: object
-    getIsolationWindows_200_response:
+    getIsolationWindows_200_response_inner:
       example:
+        Scan: 0
         IsolationWindows:
-        - high: 6.027456183070403
-          low: 0.8008281904610115
-        - high: 6.027456183070403
-          low: 0.8008281904610115
+          high: 1.4658129805029452
+          low: 6.027456183070403
       properties:
-        IsolationWindows:
-          items:
-            $ref: '#/components/schemas/getIsolationWindows_200_response_IsolationWindows_inner'
-          type: array
-      type: object
-    getChromatogramCount_200_response:
-      example:
-        chromatogramCount: 0
-      properties:
-        chromatogramCount:
+        Scan:
           format: int64
+          minimum: 0
           type: integer
+        IsolationWindows:
+          $ref: '#/components/schemas/getIsolationWindows_200_response_inner_IsolationWindows'
       type: object

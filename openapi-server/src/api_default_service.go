@@ -32,7 +32,7 @@ func NewDefaultApiService() DefaultApiServicer {
 }
 
 // Get3dMap -
-func (s *DefaultApiService) Get3dMap(ctx context.Context, msDataId string) (ImplResponse, error) {
+func (s *DefaultApiService) Get3dMap(ctx context.Context, msDataId string, scanId int64, lowMz float64, highMz float64, resMz float64) (ImplResponse, error) {
 	fileInfo, errResponse := getFileData(msDataId)
 	if fileInfo == nil {
 		return errResponse, nil
@@ -78,7 +78,7 @@ func (s *DefaultApiService) GetChromatogramHeader(ctx context.Context, msDataId 
 }
 
 // GetChromatograms -
-func (s *DefaultApiService) GetChromatograms(ctx context.Context, msDataId string) (ImplResponse, error) {
+func (s *DefaultApiService) GetChromatograms(ctx context.Context, msDataId string, limit int64, page int64, onlyCount bool) (ImplResponse, error) {
 	fileInfo, errResponse := getFileData(msDataId)
 	if fileInfo == nil {
 		return errResponse, nil
@@ -162,7 +162,7 @@ func (s *DefaultApiService) GetIonisationMethod(ctx context.Context, msDataId st
 }
 
 // GetIsolationWindows -
-func (s *DefaultApiService) GetIsolationWindows(ctx context.Context, msDataId string) (ImplResponse, error) {
+func (s *DefaultApiService) GetIsolationWindows(ctx context.Context, msDataId string, unique bool) (ImplResponse, error) {
 	fileInfo, errResponse := getFileData(msDataId)
 	if fileInfo == nil {
 		return errResponse, nil
@@ -186,6 +186,16 @@ func (s *DefaultApiService) GetSampleData(ctx context.Context, msDataId string) 
 
 }
 
+func (s *DefaultApiService) GetRunData(ctx context.Context, msDataId string) (ImplResponse, error) {
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	data := fileInfo.msdata.GetRunInfo()
+	dataMap := getMapFromStruct(data)
+	return Response(200, dataMap), nil
+}
+
 // GetScanCount -
 func (s *DefaultApiService) GetScanCount(ctx context.Context, msDataId string) (ImplResponse, error) {
 	fileInfo, errResponse := getFileData(msDataId)
@@ -197,7 +207,7 @@ func (s *DefaultApiService) GetScanCount(ctx context.Context, msDataId string) (
 }
 
 // GetScanHeader -
-func (s *DefaultApiService) GetScanHeader(ctx context.Context, msDataId string) (ImplResponse, error) {
+func (s *DefaultApiService) GetScanHeader(ctx context.Context, msDataId string, scanId int64) (ImplResponse, error) {
 	fileInfo, errResponse := getFileData(msDataId)
 	if fileInfo == nil {
 		return errResponse, nil
@@ -220,7 +230,7 @@ func (s *DefaultApiService) GetScanPeakCount(ctx context.Context, msDataId strin
 }
 
 // GetScanPeaks -
-func (s *DefaultApiService) GetScanPeaks(ctx context.Context, msDataId string) (ImplResponse, error) {
+func (s *DefaultApiService) GetScanPeaks(ctx context.Context, msDataId string, scanId int64) (ImplResponse, error) {
 	fileInfo, errResponse := getFileData(msDataId)
 	if fileInfo == nil {
 		return errResponse, nil
@@ -232,7 +242,7 @@ func (s *DefaultApiService) GetScanPeaks(ctx context.Context, msDataId string) (
 }
 
 // GetScansData -
-func (s *DefaultApiService) GetScansData(ctx context.Context, msDataId string) (ImplResponse, error) {
+func (s *DefaultApiService) GetScansData(ctx context.Context, msDataId string, onlyCount bool, limit int64, page int64) (ImplResponse, error) {
 	fileInfo, errResponse := getFileData(msDataId)
 	if fileInfo == nil {
 		return errResponse, nil
