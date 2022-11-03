@@ -10,8 +10,7 @@
 package mzserver
 
 type GetScanPeaks200Response struct {
-
-	Peaks []float32 `json:"peaks,omitempty"`
+	Peaks []float64 `json:"peaks,omitempty"`
 }
 
 // AssertGetScanPeaks200ResponseRequired checks if the required fields are not zero-ed

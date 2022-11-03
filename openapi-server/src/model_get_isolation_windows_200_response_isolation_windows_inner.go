@@ -10,10 +10,9 @@
 package mzserver
 
 type GetIsolationWindows200ResponseIsolationWindowsInner struct {
+	Low float64 `json:"low,omitempty"`
 
-	Low float32 `json:"low,omitempty"`
-
-	High float32 `json:"high,omitempty"`
+	High float64 `json:"high,omitempty"`
 }
 
 // AssertGetIsolationWindows200ResponseIsolationWindowsInnerRequired checks if the required fields are not zero-ed

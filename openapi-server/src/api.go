@@ -50,8 +50,8 @@ type DefaultApiRouter interface {
 type DefaultApiServicer interface {
 	Get3dMap(context.Context, string) (ImplResponse, error)
 	GetChromatogramCount(context.Context, string) (ImplResponse, error)
-	GetChromatogramData(context.Context, string, int32) (ImplResponse, error)
-	GetChromatogramHeader(context.Context, string, int32) (ImplResponse, error)
+	GetChromatogramData(context.Context, string, int64) (ImplResponse, error)
+	GetChromatogramHeader(context.Context, string, int64) (ImplResponse, error)
 	GetChromatograms(context.Context, string) (ImplResponse, error)
 	GetFileName(context.Context, string) (ImplResponse, error)
 	GetInstrumentAnalyzer(context.Context, string) (ImplResponse, error)

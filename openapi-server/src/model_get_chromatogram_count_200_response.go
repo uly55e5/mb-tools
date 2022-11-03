@@ -10,8 +10,7 @@
 package mzserver
 
 type GetChromatogramCount200Response struct {
-
-	ChromatogramCount int32 `json:"chromatogramCount,omitempty"`
+	ChromatogramCount int64 `json:"chromatogramCount,omitempty"`
 }
 
 // AssertGetChromatogramCount200ResponseRequired checks if the required fields are not zero-ed

@@ -10,8 +10,7 @@
 package mzserver
 
 type GetScansData200Response struct {
-
-	Scans []int32 `json:"scans,omitempty"`
+	Scans []int64 `json:"scans,omitempty"`
 }
 
 // AssertGetScansData200ResponseRequired checks if the required fields are not zero-ed

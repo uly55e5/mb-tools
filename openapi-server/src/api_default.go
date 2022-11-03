@@ -218,7 +218,7 @@ func (c *DefaultApiController) GetChromatogramCount(w http.ResponseWriter, r *ht
 func (c *DefaultApiController) GetChromatogramData(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
 
-	chromatogramIdParam, err := parseInt32Parameter(chi.URLParam(r, "chromatogramId"), true)
+	chromatogramIdParam, err := parseInt64Parameter(chi.URLParam(r, "chromatogramId"), true)
 	if err != nil {
 		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
 		return
@@ -239,7 +239,7 @@ func (c *DefaultApiController) GetChromatogramData(w http.ResponseWriter, r *htt
 func (c *DefaultApiController) GetChromatogramHeader(w http.ResponseWriter, r *http.Request) {
 	msDataIdParam := chi.URLParam(r, "msDataId")
 
-	chromatogramIdParam, err := parseInt32Parameter(chi.URLParam(r, "chromatogramId"), true)
+	chromatogramIdParam, err := parseInt64Parameter(chi.URLParam(r, "chromatogramId"), true)
 	if err != nil {
 		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
 		return

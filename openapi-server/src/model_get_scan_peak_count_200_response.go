@@ -10,8 +10,7 @@
 package mzserver
 
 type GetScanPeakCount200Response struct {
-
-	PeakCount int32 `json:"peakCount,omitempty"`
+	PeakCount int64 `json:"peakCount,omitempty"`
 }
 
 // AssertGetScanPeakCount200ResponseRequired checks if the required fields are not zero-ed

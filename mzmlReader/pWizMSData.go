@@ -225,7 +225,7 @@ func (data *MSData) SourceInfo() string {
 
 func (data *MSData) Header(scans ...int) HeaderInfo {
 	if len(scans) == 0 {
-		scans = getAllScans(data)
+		scans = data.GetAllScans()
 	}
 	cScans, length := gSlice2CArrayInt(scans)
 	cheaderPtr := C.getScanHeaderInfo(data.msData, cScans, C.int(length))
@@ -303,7 +303,7 @@ func (data *MSData) Header(scans ...int) HeaderInfo {
 	return header
 }
 
-func getAllScans(data *MSData) []int {
+func (data *MSData) GetAllScans() []int {
 	size := data.Length()
 	scans := make([]int, size)
 	for i := range scans {
@@ -435,7 +435,7 @@ func (data *MSData) ChromatogramHeader(scans ...int) ChromatogramHeaderInfo {
 
 func (data *MSData) Get3DMap(lowMz float64, highMz float64, resMZ float64, scans ...int) Map3D {
 	if len(scans) == 0 {
-		scans = getAllScans(data)
+		scans = data.GetAllScans()
 	}
 	cScans, length := gSlice2CArrayInt(scans)
 	cMap3d := C.get3DMap(data.msData, cScans, C.int(length), C.double(lowMz), C.double(highMz), C.double(resMZ))

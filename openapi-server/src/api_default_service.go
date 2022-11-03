@@ -12,11 +12,8 @@ package mzserver
 import (
 	"context"
 	"crypto/sha256"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/uly55e5/mb-tools/mzmlReader"
-	"net/http"
 	"os"
 	"strconv"
 	"time"
@@ -36,266 +33,249 @@ func NewDefaultApiService() DefaultApiServicer {
 
 // Get3dMap -
 func (s *DefaultApiService) Get3dMap(ctx context.Context, msDataId string) (ImplResponse, error) {
-	// TODO - update Get3dMap with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	// TODO implement parameters
+	map3D := fileInfo.msdata.Get3DMap(0, 5000, 1)
+	map3Dmap := getMapFromStruct(map3D)
+	return Response(200, map3Dmap), nil
 
-	//TODO: Uncomment the next line to return response Response(200, map[string]interface{}{}) or use other options such as http.Ok ...
-	//return Response(200, map[string]interface{}{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("Get3dMap method not implemented")
 }
 
 // GetChromatogramCount -
 func (s *DefaultApiService) GetChromatogramCount(ctx context.Context, msDataId string) (ImplResponse, error) {
-	// TODO - update GetChromatogramCount with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, GetChromatogramCount200Response{}) or use other options such as http.Ok ...
-	//return Response(200, GetChromatogramCount200Response{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetChromatogramCount method not implemented")
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	count := fileInfo.msdata.ChromatogramCount()
+	return Response(200, GetChromatogramCount200Response{int64(count)}), nil
 }
 
 // GetChromatogramData -
-func (s *DefaultApiService) GetChromatogramData(ctx context.Context, msDataId string, chromatogramId int32) (ImplResponse, error) {
-	// TODO - update GetChromatogramData with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+func (s *DefaultApiService) GetChromatogramData(ctx context.Context, msDataId string, chromatogramId int64) (ImplResponse, error) {
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	chromatogramData := fileInfo.msdata.Chromatogram(int(chromatogramId))
+	chromMap := getMapFromStruct(chromatogramData)
+	return Response(200, chromMap), nil
 
-	//TODO: Uncomment the next line to return response Response(200, map[string]interface{}{}) or use other options such as http.Ok ...
-	//return Response(200, map[string]interface{}{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetChromatogramData method not implemented")
 }
 
 // GetChromatogramHeader -
-func (s *DefaultApiService) GetChromatogramHeader(ctx context.Context, msDataId string, chromatogramId int32) (ImplResponse, error) {
-	// TODO - update GetChromatogramHeader with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, map[string]interface{}{}) or use other options such as http.Ok ...
-	//return Response(200, map[string]interface{}{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetChromatogramHeader method not implemented")
+func (s *DefaultApiService) GetChromatogramHeader(ctx context.Context, msDataId string, chromatogramId int64) (ImplResponse, error) {
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	header := fileInfo.msdata.ChromatogramHeader(int(chromatogramId))
+	headerMap := getMapFromStruct(header)
+	return Response(200, headerMap), nil
 }
 
 // GetChromatograms -
 func (s *DefaultApiService) GetChromatograms(ctx context.Context, msDataId string) (ImplResponse, error) {
-	// TODO - update GetChromatograms with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	chroms := fileInfo.msdata.Chromatograms()
+	chromMap := getMapFromStruct(chroms)
+	return Response(200, chromMap), nil
 
-	//TODO: Uncomment the next line to return response Response(200, map[string]interface{}{}) or use other options such as http.Ok ...
-	//return Response(200, map[string]interface{}{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetChromatograms method not implemented")
 }
 
 // GetFileName -
 func (s *DefaultApiService) GetFileName(ctx context.Context, msDataId string) (ImplResponse, error) {
-	// TODO - update GetFileName with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	return Response(200, GetFileName200Response{fileInfo.fileName}), nil
 
-	//TODO: Uncomment the next line to return response Response(200, GetFileName200Response{}) or use other options such as http.Ok ...
-	//return Response(200, GetFileName200Response{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetFileName method not implemented")
 }
 
 // GetInstrumentAnalyzer -
 func (s *DefaultApiService) GetInstrumentAnalyzer(ctx context.Context, msDataId string) (ImplResponse, error) {
-	// TODO - update GetInstrumentAnalyzer with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, GetInstrumentAnalyzer200Response{}) or use other options such as http.Ok ...
-	//return Response(200, GetInstrumentAnalyzer200Response{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetInstrumentAnalyzer method not implemented")
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	analyzer := fileInfo.msdata.Analyzer()
+	return Response(200, GetInstrumentAnalyzer200Response{analyzer}), nil
 }
 
 // GetInstrumentData -
 func (s *DefaultApiService) GetInstrumentData(ctx context.Context, msDataId string) (ImplResponse, error) {
-	fileinfo, ok := files[msDataId]
-	if !ok {
-		return Response(http.StatusNotImplemented, nil), errors.New("GetInstrumentData method not implemented")
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
 	}
-	msdata := fileinfo.msdata
-	info := msdata.InstrumentInfo()
-	var infoMap map[string]interface{}
-	inrec, _ := json.Marshal(info)
-	json.Unmarshal(inrec, &infoMap)
-
-	// TODO - update GetInstrumentData with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, map[string]interface{}{}) or use other options such as http.Ok ...
+	info := fileInfo.msdata.InstrumentInfo()
+	infoMap := getMapFromStruct(info)
 	return Response(200, infoMap), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetInstrumentData method not implemented")
 }
 
 // GetInstrumentDetector -
 func (s *DefaultApiService) GetInstrumentDetector(ctx context.Context, msDataId string) (ImplResponse, error) {
-	// TODO - update GetInstrumentDetector with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, GetInstrumentDetector200Response{}) or use other options such as http.Ok ...
-	//return Response(200, GetInstrumentDetector200Response{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetInstrumentDetector method not implemented")
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	detector := fileInfo.msdata.Detector()
+	return Response(200, GetInstrumentDetector200Response{detector}), nil
 }
 
 // GetInstrumentManufacturer -
 func (s *DefaultApiService) GetInstrumentManufacturer(ctx context.Context, msDataId string) (ImplResponse, error) {
-	// TODO - update GetInstrumentManufacturer with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	manufacturer := fileInfo.msdata.Manufacturer()
+	return Response(200, GetInstrumentManufacturer200Response{manufacturer}), nil
 
-	//TODO: Uncomment the next line to return response Response(200, GetInstrumentManufacturer200Response{}) or use other options such as http.Ok ...
-	//return Response(200, GetInstrumentManufacturer200Response{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetInstrumentManufacturer method not implemented")
 }
 
 // GetInstrumentModel -
 func (s *DefaultApiService) GetInstrumentModel(ctx context.Context, msDataId string) (ImplResponse, error) {
-	// TODO - update GetInstrumentModel with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, GetInstrumentModel200Response{}) or use other options such as http.Ok ...
-	//return Response(200, GetInstrumentModel200Response{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetInstrumentModel method not implemented")
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	model := fileInfo.msdata.Model()
+	return Response(200, GetInstrumentModel200Response{model}), nil
 }
 
 // GetIonisationMethod -
 func (s *DefaultApiService) GetIonisationMethod(ctx context.Context, msDataId string) (ImplResponse, error) {
-	// TODO - update GetIonisationMethod with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, GetIonisationMethod200Response{}) or use other options such as http.Ok ...
-	//return Response(200, GetIonisationMethod200Response{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetIonisationMethod method not implemented")
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	method := fileInfo.msdata.Ionisation()
+	return Response(200, GetIonisationMethod200Response{method}), nil
 }
 
 // GetIsolationWindows -
 func (s *DefaultApiService) GetIsolationWindows(ctx context.Context, msDataId string) (ImplResponse, error) {
-	// TODO - update GetIsolationWindows with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, GetIsolationWindows200Response{}) or use other options such as http.Ok ...
-	//return Response(200, GetIsolationWindows200Response{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetIsolationWindows method not implemented")
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	windows := fileInfo.msdata.IsolationWindow(true)
+	var result = []GetIsolationWindows200ResponseIsolationWindowsInner{}
+	for _, w := range windows {
+		result = append(result, GetIsolationWindows200ResponseIsolationWindowsInner{w.Low, w.High})
+	}
+	return Response(200, GetIsolationWindows200Response{result}), nil
 }
 
 // GetSampleData -
 func (s *DefaultApiService) GetSampleData(ctx context.Context, msDataId string) (ImplResponse, error) {
-	// TODO - update GetSampleData with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	data := fileInfo.msdata.SampleInfo()
+	return Response(200, GetSampleData200Response{data}), nil
 
-	//TODO: Uncomment the next line to return response Response(200, GetSampleData200Response{}) or use other options such as http.Ok ...
-	//return Response(200, GetSampleData200Response{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetSampleData method not implemented")
 }
 
 // GetScanCount -
 func (s *DefaultApiService) GetScanCount(ctx context.Context, msDataId string) (ImplResponse, error) {
-	// TODO - update GetScanCount with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, GetScanCount200Response{}) or use other options such as http.Ok ...
-	//return Response(200, GetScanCount200Response{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetScanCount method not implemented")
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	count := fileInfo.msdata.Length()
+	return Response(200, GetScanCount200Response{int64(count)}), nil
 }
 
 // GetScanHeader -
 func (s *DefaultApiService) GetScanHeader(ctx context.Context, msDataId string) (ImplResponse, error) {
-	// TODO - update GetScanHeader with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, map[string]interface{}{}) or use other options such as http.Ok ...
-	//return Response(200, map[string]interface{}{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetScanHeader method not implemented")
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	header := fileInfo.msdata.Header()
+	headerMap := getMapFromStruct(header)
+	return Response(200, headerMap), nil
 }
 
 // GetScanPeakCount -
 func (s *DefaultApiService) GetScanPeakCount(ctx context.Context, msDataId string) (ImplResponse, error) {
-	// TODO - update GetScanPeakCount with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	//count := fileInfo.msdata.PeaksCount()
+	// TODO implement
+	return Response(200, GetScanPeakCount200Response{}), nil
 
-	//TODO: Uncomment the next line to return response Response(200, GetScanPeakCount200Response{}) or use other options such as http.Ok ...
-	//return Response(200, GetScanPeakCount200Response{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetScanPeakCount method not implemented")
 }
 
 // GetScanPeaks -
 func (s *DefaultApiService) GetScanPeaks(ctx context.Context, msDataId string) (ImplResponse, error) {
-	// TODO - update GetScanPeaks with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	//peaks := fileInfo.msdata.Peaks()
+	// TODO: implement
+	return Response(200, GetScanPeaks200Response{}), nil
 
-	//TODO: Uncomment the next line to return response Response(200, GetScanPeaks200Response{}) or use other options such as http.Ok ...
-	//return Response(200, GetScanPeaks200Response{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetScanPeaks method not implemented")
 }
 
 // GetScansData -
 func (s *DefaultApiService) GetScansData(ctx context.Context, msDataId string) (ImplResponse, error) {
-	// TODO - update GetScansData with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, GetScansData200Response{}) or use other options such as http.Ok ...
-	//return Response(200, GetScansData200Response{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetScansData method not implemented")
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	scans := fileInfo.msdata.GetAllScans()
+	scans64 := []int64{}
+	for _, e := range scans {
+		scans64 = append(scans64, int64(e))
+	}
+	return Response(200, GetScansData200Response{scans64}), nil
 }
 
 // GetSoftware -
 func (s *DefaultApiService) GetSoftware(ctx context.Context, msDataId string) (ImplResponse, error) {
-	// TODO - update GetSoftware with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	software := fileInfo.msdata.SoftwareInfo()
+	return Response(200, GetSoftware200Response{software}), nil
 
-	//TODO: Uncomment the next line to return response Response(200, GetSoftware200Response{}) or use other options such as http.Ok ...
-	//return Response(200, GetSoftware200Response{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetSoftware method not implemented")
 }
 
 // GetSource -
 func (s *DefaultApiService) GetSource(ctx context.Context, msDataId string) (ImplResponse, error) {
-	msdata := files[msDataId].msdata
-	source := msdata.SourceInfo()
-	// TODO - update GetSource with the required logic for this service method.
-	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	//TODO: Uncomment the next line to return response Response(200, GetSource200Response{}) or use other options such as http.Ok ...
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	source := fileInfo.msdata.SourceInfo()
 	return Response(200, GetSource200Response{source}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("GetSource method not implemented")
 }
-
-type fileData struct {
-	fileName  string
-	msdata    *mzmlReader.MSData
-	timestamp int64
-	size      uintptr
-}
-
-var files = map[string]fileData{}
 
 // PostFile -
 func (s *DefaultApiService) PostFile(ctx context.Context, filename string, file *os.File) (ImplResponse, error) {
 	if filename != "" && file != nil {
 		timestamp := time.Now().Unix()
 		id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(timestamp, 10)+filename)))[:45]
-		msdata, err := mzmlReader.OpenMSData(file.Name())
+		msData, err := mzmlReader.OpenMSData(file.Name())
 		if err != nil {
 			return Response(400, ErrorMsg{"Could not open file"}), nil
 		}
-		files[id] = fileData{filename, msdata, timestamp, unsafe.Sizeof(*msdata)}
+		files[id] = fileData{filename, file, msData, timestamp, unsafe.Sizeof(*msData)}
 		return Response(200, PostFile200Response{id}), nil
 	}
 	return Response(400, ErrorMsg{"File or filename not submitted"}), nil

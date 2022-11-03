@@ -47,6 +47,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/getFileName_200_response'
           description: get filename
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/instrument:
     get:
       operationId: getInstrumentData
@@ -66,6 +78,18 @@ paths:
               schema:
                 type: object
           description: get instrument data
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/instrument/analyzer:
     get:
       operationId: getInstrumentAnalyzer
@@ -85,6 +109,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/getInstrumentAnalyzer_200_response'
           description: get analyzer
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/instrument/detector:
     get:
       operationId: getInstrumentDetector
@@ -104,6 +140,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/getInstrumentDetector_200_response'
           description: get detector
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/instrument/ionisation:
     get:
       operationId: getIonisationMethod
@@ -123,6 +171,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/getIonisationMethod_200_response'
           description: get ionisation
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/instrument/manufacturer:
     get:
       operationId: getInstrumentManufacturer
@@ -142,6 +202,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/getInstrumentManufacturer_200_response'
           description: get manufacturer
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/instrument/model:
     get:
       operationId: getInstrumentModel
@@ -161,6 +233,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/getInstrumentModel_200_response'
           description: get model
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/instrument/sample:
     get:
       operationId: getSampleData
@@ -180,6 +264,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/getSampleData_200_response'
           description: get sample
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/instrument/software:
     get:
       operationId: getSoftware
@@ -199,6 +295,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/getSoftware_200_response'
           description: get software
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/instrument/source:
     get:
       operationId: getSource
@@ -218,6 +326,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/getSource_200_response'
           description: get source
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/scans:
     get:
       operationId: getScansData
@@ -237,6 +357,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/getScansData_200_response'
           description: get scans
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/scans/{id}/header:
     get:
       operationId: getScanHeader
@@ -256,6 +388,18 @@ paths:
               schema:
                 type: object
           description: get scan header
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/scans/{id}/peaks:
     get:
       operationId: getScanPeaks
@@ -275,6 +419,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/getScanPeaks_200_response'
           description: get peaks
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/scans/{id}/peaks/count:
     get:
       operationId: getScanPeakCount
@@ -294,6 +450,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/getScanPeakCount_200_response'
           description: get peak count
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/scans/count:
     get:
       operationId: getScanCount
@@ -313,6 +481,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/getScanCount_200_response'
           description: get scan count
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/IsolationWindow:
     get:
       operationId: getIsolationWindows
@@ -332,6 +512,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/getIsolationWindows_200_response'
           description: get isolation windows
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/chromatograms:
     get:
       operationId: getChromatograms
@@ -351,6 +543,18 @@ paths:
               schema:
                 type: object
           description: get chromatograms
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/chromatograms/count:
     get:
       operationId: getChromatogramCount
@@ -370,6 +574,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/getChromatogramCount_200_response'
           description: get chromatogram count
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/chromatograms/{chromatogramId}:
     get:
       operationId: getChromatogramData
@@ -397,6 +613,18 @@ paths:
               schema:
                 type: object
           description: get chromatogram
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/chromatograms/{chromatogramId}/header:
     get:
       operationId: getChromatogramHeader
@@ -424,6 +652,18 @@ paths:
               schema:
                 type: object
           description: get chromatogram header
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
   /msdata/{msDataId}/3dmap:
     get:
       operationId: get3dMap
@@ -443,6 +683,18 @@ paths:
               schema:
                 type: object
           description: get 3D map
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: msdata not found
 components:
   parameters:
     msDataId:
@@ -470,10 +722,17 @@ components:
           schema:
             $ref: '#/components/schemas/errorMsg'
       description: error in request
+    "404":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorMsg'
+      description: msdata not found
   schemas:
     msDataId:
       type: string
     chromatogramId:
+      format: int64
       type: integer
     errorMsg:
       properties:
@@ -566,6 +825,7 @@ components:
       properties:
         scans:
           items:
+            format: int64
             type: integer
           type: array
       type: object
@@ -577,6 +837,7 @@ components:
       properties:
         peaks:
           items:
+            format: double
             type: number
           type: array
       type: object
@@ -585,6 +846,7 @@ components:
         peakCount: 0
       properties:
         peakCount:
+          format: int64
           type: integer
       type: object
     getScanCount_200_response:
@@ -592,6 +854,7 @@ components:
         scanCount: 0
       properties:
         scanCount:
+          format: int64
           type: integer
       type: object
     getIsolationWindows_200_response_IsolationWindows_inner:
@@ -600,8 +863,10 @@ components:
         low: 0.8008281904610115
       properties:
         low:
+          format: double
           type: number
         high:
+          format: double
           type: number
       type: object
     getIsolationWindows_200_response:
@@ -622,5 +887,6 @@ components:
         chromatogramCount: 0
       properties:
         chromatogramCount:
+          format: int64
           type: integer
       type: object
