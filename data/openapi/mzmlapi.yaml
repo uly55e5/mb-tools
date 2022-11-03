@@ -12,11 +12,31 @@ components:
     chromatogramId:
       type: integer
       format: int64
+      minimum: 0
     errorMsg:
       type: object
       properties:
         errorMsg:
           type: string
+    countOnly:
+      type: boolean
+    limit:
+      type: integer
+      format: int64
+      default: 50
+      minimum: 1
+    page:
+      type: integer
+      format: int64
+      default: 1
+      minimum: 1
+    scanId:
+      type: integer
+      format: int64
+      minimum: 0
+    unique:
+      type: boolean
+      default: false
 
   parameters:
     msDataId:
@@ -33,6 +53,68 @@ components:
       schema:
         $ref: '#/components/schemas/chromatogramId'
       required: true
+    scanId:
+      in: path
+      name: scanId
+      description: the identifier of the scan
+      schema:
+        $ref: '#/components/schemas/scanId'
+      required: true
+    countOnly:
+      in: query
+      name: countOnly
+      description: get only the header with item count
+      schema:
+        $ref: '#/components/schemas/countOnly'
+      required: false
+    limit:
+      in: query
+      name: limit
+      description: items per page
+      schema:
+        $ref: '#/components/schemas/limit'
+      required: false
+    page:
+      in: query
+      name: page
+      description: page offset
+      schema:
+        $ref: '#/components/schemas/page'
+      required: false
+    unique:
+      in: query
+      name: unique
+      description: get only unique values
+      schema:
+        $ref: '#/components/schemas/unique'
+      required: false
+    highMz:
+      in: query
+      name: highMz
+      description: upper limit for Mz
+      schema:
+        type: number
+        format: double
+        default: 5000
+      required: false
+    lowMz:
+      in: query
+      name: lowMz
+      description: lower limit for Mz
+      schema:
+        type: number
+        format: double
+        default: 0
+      required: false
+    resMz:
+      in: query
+      name: resMz
+      description: resolution for Mz
+      schema:
+        type: number
+        format: double
+        default: 1
+      required: false
   responses:
     400:
       description: error in request
@@ -41,11 +123,16 @@ components:
           schema:
             $ref: '#/components/schemas/errorMsg'
     404:
-      description: msdata not found
+      description: data not found
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/errorMsg'
+  headers:
+    X-Total-Count:
+      schema:
+        type: integer
+        format: int64
 
 
 paths:
@@ -106,6 +193,23 @@ paths:
       responses:
         200:
           description: get instrument data
+          content:
+            application/json:
+              schema:
+                type: object
+        400:
+          $ref: '#/components/responses/400'
+        404:
+          $ref: '#/components/responses/404'
+
+  /msdata/{msDataId}/run:
+    parameters:
+      - $ref: '#/components/parameters/msDataId'
+    get:
+      operationId: getRunData
+      responses:
+        200:
+          description: get run data
           content:
             application/json:
               schema:
@@ -279,11 +383,17 @@ paths:
   /msdata/{msDataId}/scans:
     parameters:
       - $ref: '#/components/parameters/msDataId'
+      - $ref: '#/components/parameters/countOnly'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/page'
     get:
       operationId: getScansData
       responses:
         200:
           description: get scans
+          headers:
+            X-Total-Count:
+              $ref: '#/components/headers/X-Total-Count'
           content:
             application/json:
               schema:
@@ -299,9 +409,10 @@ paths:
         404:
           $ref: '#/components/responses/404'
 
-  /msdata/{msDataId}/scans/{id}/header:
+  /msdata/{msDataId}/scan/{scanId}/header:
     parameters:
       - $ref: '#/components/parameters/msDataId'
+      - $ref: '#/components/parameters/scanId'
     get:
       operationId: getScanHeader
       responses:
@@ -316,14 +427,18 @@ paths:
         404:
           $ref: '#/components/responses/404'
 
-  /msdata/{msDataId}/scans/{id}/peaks:
+  /msdata/{msDataId}/scan/{scanId}/peaks:
     parameters:
       - $ref: '#/components/parameters/msDataId'
+      - $ref: '#/components/parameters/scanId'
     get:
       operationId: getScanPeaks
       responses:
         200:
           description: get peaks
+          headers:
+            X-Total-Count:
+              $ref: '#/components/headers/X-Total-Count'
           content:
             application/json:
               schema:
@@ -339,64 +454,28 @@ paths:
         404:
           $ref: '#/components/responses/404'
 
-  /msdata/{msDataId}/scans/{id}/peaks/count:
+  /msdata/{msDataId}/IsolationWindows:
     parameters:
       - $ref: '#/components/parameters/msDataId'
-    get:
-      operationId: getScanPeakCount
-      responses:
-        200:
-          description: get peak count
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  peakCount:
-                    type: integer
-                    format: int64
-        400:
-          $ref: '#/components/responses/400'
-        404:
-          $ref: '#/components/responses/404'
-
-  /msdata/{msDataId}/scans/count:
-    parameters:
-      - $ref: '#/components/parameters/msDataId'
-    get:
-      operationId: getScanCount
-      responses:
-        200:
-          description: get scan count
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  scanCount:
-                    type: integer
-                    format: int64
-        400:
-          $ref: '#/components/responses/400'
-        404:
-          $ref: '#/components/responses/404'
-
-  /msdata/{msDataId}/IsolationWindow:
-    parameters:
-      - $ref: '#/components/parameters/msDataId'
+      - $ref: '#/components/parameters/unique'
     get:
       operationId: getIsolationWindows
       responses:
         200:
           description: get isolation windows
+          headers:
+            X-Total-Count:
+              $ref: '#/components/headers/X-Total-Count'
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  IsolationWindows:
-                    type: array
-                    items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    Scan:
+                      $ref: '#/components/schemas/scanId'
+                    IsolationWindows:
                       type: object
                       properties:
                         low:
@@ -413,36 +492,23 @@ paths:
   /msdata/{msDataId}/chromatograms:
     parameters:
       - $ref: '#/components/parameters/msDataId'
+      - $ref: '#/components/parameters/limit'
+      - $ref: '#/components/parameters/page'
+      - $ref: '#/components/parameters/countOnly'
     get:
       operationId: getChromatograms
       responses:
         200:
+          headers:
+            X-Total-Count:
+              $ref: '#/components/headers/X-Total-Count'
           description: get chromatograms
           content:
             application/json:
               schema:
-                type: object
-        400:
-          $ref: '#/components/responses/400'
-        404:
-          $ref: '#/components/responses/404'
-
-  /msdata/{msDataId}/chromatograms/count:
-    parameters:
-      - $ref: '#/components/parameters/msDataId'
-    get:
-      operationId: getChromatogramCount
-      responses:
-        200:
-          description: get chromatogram count
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  chromatogramCount:
-                    type: integer
-                    format: int64
+                type: array
+                items:
+                  type: object
         400:
           $ref: '#/components/responses/400'
         404:
@@ -485,9 +551,14 @@ paths:
         404:
           $ref: '#/components/responses/404'
 
-  /msdata/{msDataId}/3dmap:
+  /msdata/{msDataId}/3dmap/{scanId}:
     parameters:
       - $ref: '#/components/parameters/msDataId'
+      - $ref: '#/components/parameters/scanId'
+      - $ref: '#/components/parameters/lowMz'
+      - $ref: '#/components/parameters/highMz'
+      - $ref: '#/components/parameters/resMz'
+
     get:
       operationId: get3dMap
       responses:
