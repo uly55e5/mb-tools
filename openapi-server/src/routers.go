@@ -25,9 +25,9 @@ import (
 
 // A Route defines the parameters for an api endpoint
 type Route struct {
-	Name		string
-	Method	  string
-	Pattern	 string
+	Name        string
+	Method      string
+	Pattern     string
 	HandlerFunc http.HandlerFunc
 }
 
@@ -45,7 +45,7 @@ const errMsgRequiredMissing = "required parameter is missing"
 func NewRouter(routers ...Router) chi.Router {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
-	router.Use(cors.Handler(cors.Options{}))
+	router.Use(cors.Handler(cors.Options{AllowedOrigins: []string{"*"}, AllowedHeaders: []string{"*"}}))
 	for _, api := range routers {
 		for _, route := range api.Routes() {
 			var handler http.Handler
