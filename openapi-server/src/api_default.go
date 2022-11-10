@@ -11,6 +11,7 @@ package mzserver
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
@@ -183,9 +184,9 @@ func (c *DefaultApiController) Get3dMap(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	lowMzParam := query.Get("lowMz")
-	highMzParam := query.Get("highMz")
-	resMzParam := query.Get("resMz")
+	lowMzParam, _ := strconv.ParseFloat(query.Get("lowMz"), 64)
+	highMzParam, _ := strconv.ParseFloat(query.Get("highMz"), 64)
+	resMzParam, _ := strconv.ParseFloat(query.Get("resMz"), 64)
 	result, err := c.service.Get3dMap(r.Context(), msDataIdParam, scanIdParam, lowMzParam, highMzParam, resMzParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
