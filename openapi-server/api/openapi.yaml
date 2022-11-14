@@ -759,6 +759,74 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorMsg'
           description: data not found
+  /msdata/{msDataId}/scan/{scanId}/image:
+    get:
+      operationId: getScanImage
+      parameters:
+      - description: the identifier of the scan
+        explode: false
+        in: path
+        name: scanId
+        required: true
+        schema:
+          $ref: '#/components/schemas/scanId'
+        style: simple
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            image/png:
+              schema:
+                format: binary
+                type: string
+          description: get an image of the scan
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
+  /msdata/{msDataId}/chromatograms/{chromatogramId}/image:
+    get:
+      operationId: getChromatogramImage
+      parameters:
+      - description: the identifier of a chromatogram
+        explode: false
+        in: path
+        name: chromatogramId
+        required: true
+        schema:
+          $ref: '#/components/schemas/chromatogramId'
+        style: simple
+      - description: the identifier for the MS data from mzML file
+        explode: false
+        in: path
+        name: msDataId
+        required: true
+        schema:
+          $ref: '#/components/schemas/msDataId'
+        style: simple
+      responses:
+        "200":
+          content:
+            image/png:
+              schema:
+                format: binary
+                type: string
+          description: get an image of the chromatogram
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorMsg'
+          description: error in request
 components:
   headers:
     X-Total-Count:

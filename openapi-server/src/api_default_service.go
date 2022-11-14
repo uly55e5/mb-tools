@@ -26,6 +26,32 @@ import (
 type DefaultApiService struct {
 }
 
+func (s *DefaultApiService) GetChromatogramImage(ctx context.Context, chromatgramId int64, msDataId string) (ImplResponse, error) {
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	chrom := fileInfo.msdata.Chromatogram(int(chromatgramId))
+	pl, err := mzmlReader.PlotChromatogram(chrom)
+	if err != nil {
+		return errResponse, nil
+	}
+	return Response(200, pl), nil
+}
+
+func (s *DefaultApiService) GetScanImage(ctx context.Context, ScanId int64, msDataId string) (ImplResponse, error) {
+	fileInfo, errResponse := getFileData(msDataId)
+	if fileInfo == nil {
+		return errResponse, nil
+	}
+	peaks := fileInfo.msdata.Peaks(int(ScanId))
+	pl, err := mzmlReader.PlotScan(peaks, ScanId)
+	if err != nil {
+		return errResponse, nil
+	}
+	return Response(200, pl), nil
+}
+
 // NewDefaultApiService creates a default api service
 func NewDefaultApiService() DefaultApiServicer {
 	return &DefaultApiService{}

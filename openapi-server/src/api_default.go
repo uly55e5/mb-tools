@@ -69,6 +69,12 @@ func (c *DefaultApiController) Routes() Routes {
 			c.GetChromatogramHeader,
 		},
 		{
+			"GetChromatogramImage",
+			strings.ToUpper("Get"),
+			"/msdata/{msDataId}/chromatograms/{chromatogramId}/image",
+			c.GetChromatogramImage,
+		},
+		{
 			"GetChromatograms",
 			strings.ToUpper("Get"),
 			"/msdata/{msDataId}/chromatograms",
@@ -139,6 +145,12 @@ func (c *DefaultApiController) Routes() Routes {
 			strings.ToUpper("Get"),
 			"/msdata/{msDataId}/scan/{scanId}/header",
 			c.GetScanHeader,
+		},
+		{
+			"GetScanImage",
+			strings.ToUpper("Get"),
+			"/msdata/{msDataId}/scan/{scanId}/image",
+			c.GetScanImage,
 		},
 		{
 			"GetScanPeaks",
@@ -230,6 +242,27 @@ func (c *DefaultApiController) GetChromatogramHeader(w http.ResponseWriter, r *h
 	}
 
 	result, err := c.service.GetChromatogramHeader(r.Context(), msDataIdParam, chromatogramIdParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result)
+		return
+	}
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
+
+}
+
+// GetChromatogramImage -
+func (c *DefaultApiController) GetChromatogramImage(w http.ResponseWriter, r *http.Request) {
+	chromatogramIdParam, err := parseInt64Parameter(chi.URLParam(r, "chromatogramId"), true)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		return
+	}
+
+	msDataIdParam := chi.URLParam(r, "msDataId")
+
+	result, err := c.service.GetChromatogramImage(r.Context(), chromatogramIdParam, msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)
@@ -438,6 +471,27 @@ func (c *DefaultApiController) GetScanHeader(w http.ResponseWriter, r *http.Requ
 	}
 
 	result, err := c.service.GetScanHeader(r.Context(), msDataIdParam, scanIdParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result)
+		return
+	}
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
+
+}
+
+// GetScanImage -
+func (c *DefaultApiController) GetScanImage(w http.ResponseWriter, r *http.Request) {
+	scanIdParam, err := parseInt64Parameter(chi.URLParam(r, "scanId"), true)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		return
+	}
+
+	msDataIdParam := chi.URLParam(r, "msDataId")
+
+	result, err := c.service.GetScanImage(r.Context(), scanIdParam, msDataIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)

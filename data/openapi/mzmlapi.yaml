@@ -20,6 +20,7 @@ components:
           type: string
     countOnly:
       type: boolean
+      default: false
     limit:
       type: integer
       format: int64
@@ -572,5 +573,40 @@ paths:
           $ref: '#/components/responses/400'
         404:
           $ref: '#/components/responses/404'
+
+  /msdata/{msDataId}/scan/{scanId}/image:
+    parameters:
+      - $ref: '#/components/parameters/scanId'
+      - $ref: '#/components/parameters/msDataId'
+    get:
+      operationId: getScanImage
+      responses:
+        200:
+          description: get an image of the scan
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        400:
+          $ref: '#/components/responses/400'
+
+  /msdata/{msDataId}/chromatograms/{chromatogramId}/image:
+    parameters:
+      - $ref: '#/components/parameters/chromatogramId'
+      - $ref: '#/components/parameters/msDataId'
+    get:
+      operationId: getChromatogramImage
+      responses:
+        200:
+          description: get an image of the chromatogram
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        400:
+          $ref: '#/components/responses/400'
+
 
 

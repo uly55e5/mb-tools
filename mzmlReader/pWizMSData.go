@@ -106,7 +106,7 @@ type RunInfo struct {
 }
 
 type PeakList struct {
-	Values   [][][]float64
+	Values   [][2][]float64
 	ColNames []string
 	Scans    []int
 }
@@ -323,9 +323,8 @@ func (data *MSData) Peaks(scans ...int) PeakList {
 	valSizes := cArray2GoSliceULongInt(cPeakList.valSizes, int(cPeakList.scanNum))
 	var cValsPtr ***C.double = cPeakList.values
 	cVals := unsafe.Slice(cValsPtr, int(cPeakList.scanNum))
-	peakList.Values = make([][][]float64, int(cPeakList.scanNum))
+	peakList.Values = make([][2][]float64, int(cPeakList.scanNum))
 	for i := 0; i < int(cPeakList.scanNum); i++ {
-		peakList.Values[i] = make([][]float64, 2)
 		var cScanValsPtr **C.double = cVals[i]
 		cScanVals := unsafe.Slice(cScanValsPtr, int(cPeakList.colNum))
 		mzs := cArray2GoSliceDouble(cScanVals[0], valSizes[i])
