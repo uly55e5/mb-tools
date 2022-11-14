@@ -958,6 +958,7 @@ components:
           type: string
       type: object
     countOnly:
+      default: false
       type: boolean
     limit:
       default: 50

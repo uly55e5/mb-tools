@@ -11,7 +11,6 @@ package mzserver
 
 import (
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
@@ -196,9 +195,9 @@ func (c *DefaultApiController) Get3dMap(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	lowMzParam, _ := strconv.ParseFloat(query.Get("lowMz"), 64)
-	highMzParam, _ := strconv.ParseFloat(query.Get("highMz"), 64)
-	resMzParam, _ := strconv.ParseFloat(query.Get("resMz"), 64)
+	lowMzParam, err := parseFloatParameter(query.Get("lowMz"), false)
+	highMzParam, err := parseFloatParameter(query.Get("highMz"), false)
+	resMzParam, err := parseFloatParameter(query.Get("resMz"), false)
 	result, err := c.service.Get3dMap(r.Context(), msDataIdParam, scanIdParam, lowMzParam, highMzParam, resMzParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
@@ -288,7 +287,7 @@ func (c *DefaultApiController) GetChromatograms(w http.ResponseWriter, r *http.R
 		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
 		return
 	}
-	countOnlyParam, err := parseBoolParameter(query.Get("countOnly"))
+	countOnlyParam, err := parseBoolParameter(query.Get("countOnly"), false)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -414,7 +413,7 @@ func (c *DefaultApiController) GetIsolationWindows(w http.ResponseWriter, r *htt
 	query := r.URL.Query()
 	msDataIdParam := chi.URLParam(r, "msDataId")
 
-	uniqueParam, err := parseBoolParameter(query.Get("unique"))
+	uniqueParam, err := parseBoolParameter(query.Get("unique"), false)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -528,7 +527,7 @@ func (c *DefaultApiController) GetScansData(w http.ResponseWriter, r *http.Reque
 	query := r.URL.Query()
 	msDataIdParam := chi.URLParam(r, "msDataId")
 
-	countOnlyParam, err := parseBoolParameter(query.Get("countOnly"))
+	countOnlyParam, err := parseBoolParameter(query.Get("countOnly"), false)
 	if err != nil {
 		w.WriteHeader(500)
 		return

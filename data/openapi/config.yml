@@ -11,4 +11,6 @@ packageVersion: 0.1.0
 router: chi
 sourceFolder: src
 inputSpec: data/openapi/mzmlapi.yaml
-
+templateDir: data/openapi/templates/
+gitUserId: uly55e5
+gitRepoId: mb-tools/openapi-server
