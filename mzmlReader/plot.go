@@ -22,7 +22,7 @@ func PlotChromatogram(chromatogram Chromatogram) (string, error) {
 }
 
 func PlotScan(peaks PeakList, ScanId int64) (string, error) {
-	pl := PlotMSSpectrum(peaks.Values[ScanId], "Peaks")
+	pl := PlotMSSpectrum(peaks.Values[0], "Peaks")
 	renderer := render.NewChartRender(pl)
 	buf := new(bytes.Buffer)
 	err := renderer.Render(buf)

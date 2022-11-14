@@ -584,10 +584,9 @@ paths:
         200:
           description: get an image of the scan
           content:
-            image/png:
+            text/html:
               schema:
                 type: string
-                format: binary
         400:
           $ref: '#/components/responses/400'
 
@@ -601,10 +600,9 @@ paths:
         200:
           description: get an image of the chromatogram
           content:
-            image/png:
+            text/html:
               schema:
                 type: string
-                format: binary
         400:
           $ref: '#/components/responses/400'
 
