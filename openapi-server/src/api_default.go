@@ -205,6 +205,7 @@ func (c *DefaultApiController) Get3dMap(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -226,6 +227,7 @@ func (c *DefaultApiController) GetChromatogramData(w http.ResponseWriter, r *htt
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -247,6 +249,7 @@ func (c *DefaultApiController) GetChromatogramHeader(w http.ResponseWriter, r *h
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -268,7 +271,8 @@ func (c *DefaultApiController) GetChromatogramImage(w http.ResponseWriter, r *ht
 		return
 	}
 	// If no error, encode the body and the result code
-	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
+
+	WriteResponse(result.Body.(string), &result.Code, "text.html", result.Headers, w)
 
 }
 
@@ -299,6 +303,7 @@ func (c *DefaultApiController) GetChromatograms(w http.ResponseWriter, r *http.R
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -314,6 +319,7 @@ func (c *DefaultApiController) GetFileName(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -329,6 +335,7 @@ func (c *DefaultApiController) GetInstrumentAnalyzer(w http.ResponseWriter, r *h
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -344,6 +351,7 @@ func (c *DefaultApiController) GetInstrumentData(w http.ResponseWriter, r *http.
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -359,6 +367,7 @@ func (c *DefaultApiController) GetInstrumentDetector(w http.ResponseWriter, r *h
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -374,6 +383,7 @@ func (c *DefaultApiController) GetInstrumentManufacturer(w http.ResponseWriter, 
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -389,6 +399,7 @@ func (c *DefaultApiController) GetInstrumentModel(w http.ResponseWriter, r *http
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -404,6 +415,7 @@ func (c *DefaultApiController) GetIonisationMethod(w http.ResponseWriter, r *htt
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -425,6 +437,7 @@ func (c *DefaultApiController) GetIsolationWindows(w http.ResponseWriter, r *htt
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -440,6 +453,7 @@ func (c *DefaultApiController) GetRunData(w http.ResponseWriter, r *http.Request
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -455,6 +469,7 @@ func (c *DefaultApiController) GetSampleData(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -476,6 +491,7 @@ func (c *DefaultApiController) GetScanHeader(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -497,7 +513,8 @@ func (c *DefaultApiController) GetScanImage(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	// If no error, encode the body and the result code
-	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
+
+	WriteResponse(result.Body.(string), &result.Code, "text.html", result.Headers, w)
 
 }
 
@@ -518,6 +535,7 @@ func (c *DefaultApiController) GetScanPeaks(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -549,6 +567,7 @@ func (c *DefaultApiController) GetScansData(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -564,6 +583,7 @@ func (c *DefaultApiController) GetSoftware(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -579,6 +599,7 @@ func (c *DefaultApiController) GetSource(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }
@@ -603,6 +624,7 @@ func (c *DefaultApiController) PostFile(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	// If no error, encode the body and the result code
+
 	EncodeJSONResponse(result.Body, &result.Code, result.Headers, w)
 
 }

@@ -237,6 +237,19 @@ func (c *{{classname}}Controller) {{nickname}}(w http.ResponseWriter, r *http.Re
 		return
 	}
 	// If no error, encode the body and the result code
-	EncodeJSONResponse(result.Body, &result.Code,{{#addResponseHeaders}} result.Headers,{{/addResponseHeaders}} w)
+
+    {{#responses}}
+        {{#is2xx}}
+            {{#content.text/html}}
+    WriteResponse(result.Body.(string), &result.Code, "text.html", result.Headers, w)
+
+            {{/content.text/html}}
+            {{^content.text/html}}
+    EncodeJSONResponse(result.Body, &result.Code,{{#addResponseHeaders}} result.Headers,{{/addResponseHeaders}} w)
+            {{/content.text/html}}
+        {{/is2xx}}
+
+    {{/responses}}
+
 
 }{{/operation}}{{/operations}}

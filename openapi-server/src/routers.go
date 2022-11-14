@@ -238,3 +238,26 @@ func parseFloatParameter(param string, required bool) (float64, error) {
 
 	return strconv.ParseFloat(param, 64)
 }
+
+func WriteResponse(content string, status *int, contentType string, headers map[string][]string, w http.ResponseWriter) error {
+	wHeader := w.Header()
+	if headers != nil {
+		for key, values := range headers {
+			for _, value := range values {
+				wHeader.Add(key, value)
+			}
+		}
+	}
+	if contentType != "" {
+		wHeader.Set("Content-Type", contentType)
+	} else {
+		wHeader.Set("Content-Type", "text/plain")
+	}
+	if status != nil {
+		w.WriteHeader(*status)
+	} else {
+		w.WriteHeader(http.StatusOK)
+	}
+	_, err := w.Write([]byte(content))
+	return err
+}
