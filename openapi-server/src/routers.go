@@ -14,6 +14,7 @@ import (
 	"errors"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
@@ -44,6 +45,11 @@ const errMsgRequiredMissing = "required parameter is missing"
 func NewRouter(routers ...Router) chi.Router {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{"https://*", "http://*"},
+		AllowedHeaders: []string{"X-Requested-With"},
+		Debug:          true,
+	}))
 	for _, api := range routers {
 		for _, route := range api.Routes() {
 			var handler http.Handler
