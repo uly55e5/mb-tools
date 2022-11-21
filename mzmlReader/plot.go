@@ -3,6 +3,7 @@ package mzmlReader
 import (
 	"bytes"
 	"github.com/go-echarts/go-echarts/v2/charts"
+	"github.com/go-echarts/go-echarts/v2/components"
 	"github.com/go-echarts/go-echarts/v2/opts"
 	"github.com/go-echarts/go-echarts/v2/render"
 	tpls "github.com/go-echarts/go-echarts/v2/templates"
@@ -71,6 +72,7 @@ func (r *partialRender) Render(w io.Writer) error {
 	tpl := render.MustTemplate(ModPartial, contents)
 
 	var buf bytes.Buffer
+	r.c.(components.Charter).Validate()
 	if err := tpl.ExecuteTemplate(&buf, ModPartial, r.c); err != nil {
 		return err
 	}
@@ -85,7 +87,7 @@ func PlotMSSpectrum(data [2][]float64, title string) *charts.Bar {
 	pl := charts.NewBar()
 	pl.SetGlobalOptions(
 		charts.WithTitleOpts(opts.Title{Title: title}),
-		charts.WithXAxisOpts(opts.XAxis{Name: "m/z", Type: "value"}),
+		charts.WithXAxisOpts(opts.XAxis{Name: "m/z"}),
 		charts.WithYAxisOpts(opts.YAxis{Name: "intensity"}),
 		charts.WithColorsOpts(opts.Colors{"#000055"}),
 	)
