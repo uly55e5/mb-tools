@@ -92,7 +92,7 @@ func TestMSData_FileName(t *testing.T) {
 		fileName string
 		want     string
 	}{
-		{"small.pwiz", pwizSmall_11_FileName, "../data/examples/small.pwiz.1.1.mzML"},
+		{"small.pwiz", pwizSmall_11_FileName, "../../data/examples/small.pwiz.1.1.mzML"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -222,7 +222,7 @@ var nanEqualOpt = cmp.Comparer(func(x, y float64) bool {
 	return (math.IsNaN(x) && math.IsNaN(y)) || x == y
 })
 
-func TestMSData_Header(t *testing.T) {
+func TestMSData_HeaderData(t *testing.T) {
 
 	type args struct {
 		scans []int
@@ -235,6 +235,7 @@ func TestMSData_Header(t *testing.T) {
 	}{
 		{"small.pwiz", pwizSmall_11_FileName, args{[]int{0}},
 			HeaderInfo{
+				1,
 				[]int{0},
 				[]int{1},
 				[]int{1},
@@ -271,8 +272,8 @@ func TestMSData_Header(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			file, _ := OpenMSData(tt.fileName)
-			if got := file.Header(tt.args.scans...); !cmp.Equal(got, tt.want, nanEqualOpt) {
-				t.Errorf("Header() = %v, want %v", got, tt.want)
+			if got := file.HeaderData(tt.args.scans...); !cmp.Equal(got, tt.want, nanEqualOpt) {
+				t.Errorf("HeaderData() = %v, want %v", got, tt.want)
 			}
 		})
 	}

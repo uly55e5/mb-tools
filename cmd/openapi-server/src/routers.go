@@ -45,11 +45,7 @@ const errMsgRequiredMissing = "required parameter is missing"
 func NewRouter(routers ...Router) chi.Router {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
-	router.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{"https://*", "http://*"},
-		AllowedHeaders: []string{"X-Requested-With"},
-		Debug:          true,
-	}))
+	router.Use(cors.Handler(cors.Options{}))
 	for _, api := range routers {
 		for _, route := range api.Routes() {
 			var handler http.Handler

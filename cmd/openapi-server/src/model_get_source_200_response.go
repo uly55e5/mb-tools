@@ -10,7 +10,6 @@
 package mzserver
 
 type GetSource200Response struct {
-
 	Source string `json:"source,omitempty"`
 }
 

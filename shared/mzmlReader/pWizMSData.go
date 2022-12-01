@@ -2,14 +2,14 @@ package mzmlReader
 
 import "C"
 
-//#cgo CFLAGS: -I../pwiz-wrapper
-//#cgo LDFLAGS: -L../pwiz-wrapper/lib -lpwiz_wrapper -Wl,-rpath=../pwiz-wrapper/lib -lstdc++ -lpwiz_all -lm -ldl
+//#cgo CFLAGS: -I../../pwiz-wrapper
+//#cgo LDFLAGS: -L../../pwiz-wrapper/lib -lpwiz_wrapper -Wl,-rpath=../pwiz-wrapper/lib -lstdc++ -lpwiz_all -lm -ldl
 //#include "cpwiz.h"
 //#define _GLIBCXX_USE_CXX11_ABI 0
 import "C"
 import (
 	"errors"
-	"github.com/uly55e5/mb-tools/common"
+	"github.com/uly55e5/mb-tools/shared/common"
 	"unsafe"
 )
 
@@ -25,6 +25,7 @@ type InstrumentInfo struct {
 }
 
 type HeaderInfo struct {
+	Size                       int
 	SeqNum                     []int
 	AcquisitionNum             []int
 	MsLevel                    []int
@@ -56,6 +57,40 @@ type HeaderInfo struct {
 	IsolationWindowUpperOffset []float64
 	ScanWindowLowerLimit       []float64
 	ScanWindowUpperLimit       []float64
+}
+
+type ScanHeader struct {
+	SeqNum                     int
+	AcquisitionNum             int
+	MsLevel                    int
+	Polarity                   int
+	PeaksCount                 int
+	TotIonCurrent              JsonFloat64
+	RetentionTime              JsonFloat64
+	BasePeakMZ                 JsonFloat64
+	BasePeakIntensity          JsonFloat64
+	CollisionEnergy            JsonFloat64
+	IonisationEnergy           JsonFloat64
+	LowMZ                      JsonFloat64
+	HighMZ                     JsonFloat64
+	PrecursorScanNum           int
+	PrecursorMZ                JsonFloat64
+	PrecursorCharge            int
+	PrecursorIntensity         JsonFloat64
+	MergedScan                 int
+	MergedResultScanNum        int
+	MergedResultStartScanNum   int
+	MergedResultEndScanNum     int
+	IonInjectionTime           JsonFloat64
+	FilterString               string
+	SpectrumId                 string
+	Centroided                 bool
+	IonMobilityDriftTime       JsonFloat64
+	IsolationWindowTargetMZ    JsonFloat64
+	IsolationWindowLowerOffset JsonFloat64
+	IsolationWindowUpperOffset JsonFloat64
+	ScanWindowLowerLimit       JsonFloat64
+	ScanWindowUpperLimit       JsonFloat64
 }
 
 type ChromatogramHeaderInfo struct {
@@ -151,7 +186,7 @@ func (data *MSData) InstrumentInfo() *InstrumentInfo {
 }
 
 func (data *MSData) GetRunInfo() RunInfo {
-	header := data.Header()
+	header := data.HeaderData()
 	var runInfo = RunInfo{}
 	runInfo.ScanCount = data.Length()
 	runInfo.LowMz = common.Min(header.LowMZ)
@@ -223,7 +258,48 @@ func (data *MSData) SourceInfo() string {
 	return data.instrumentInfo.Source
 }
 
-func (data *MSData) Header(scans ...int) HeaderInfo {
+func (data *MSData) Headers(scans ...int) []ScanHeader {
+	headerInfo := data.HeaderData(scans...)
+	var result []ScanHeader
+	for i := 0; i < headerInfo.Size; i++ {
+		header := ScanHeader{}
+		header.SeqNum = headerInfo.SeqNum[i]
+		header.AcquisitionNum = headerInfo.AcquisitionNum[i]
+		header.MsLevel = headerInfo.MsLevel[i]
+		header.Polarity = headerInfo.Polarity[i]
+		header.PeaksCount = headerInfo.PeaksCount[i]
+		header.TotIonCurrent = JsonFloat64(headerInfo.TotIonCurrent[i])
+		header.RetentionTime = JsonFloat64(headerInfo.RetentionTime[i])
+		header.BasePeakMZ = JsonFloat64(headerInfo.BasePeakMZ[i])
+		header.BasePeakIntensity = JsonFloat64(headerInfo.BasePeakIntensity[i])
+		header.CollisionEnergy = JsonFloat64(headerInfo.CollisionEnergy[i])
+		header.IonisationEnergy = JsonFloat64(headerInfo.IonisationEnergy[i])
+		header.LowMZ = JsonFloat64(headerInfo.LowMZ[i])
+		header.HighMZ = JsonFloat64(headerInfo.HighMZ[i])
+		header.PrecursorScanNum = headerInfo.PrecursorScanNum[i]
+		header.PrecursorMZ = JsonFloat64(headerInfo.PrecursorMZ[i])
+		header.PrecursorCharge = headerInfo.PrecursorCharge[i]
+		header.PrecursorIntensity = JsonFloat64(headerInfo.PrecursorIntensity[i])
+		header.MergedScan = headerInfo.MergedScan[i]
+		header.MergedResultScanNum = headerInfo.MergedResultScanNum[i]
+		header.MergedResultStartScanNum = headerInfo.MergedResultStartScanNum[i]
+		header.MergedResultEndScanNum = headerInfo.MergedResultEndScanNum[i]
+		header.IonInjectionTime = JsonFloat64(headerInfo.IonInjectionTime[i])
+		header.FilterString = headerInfo.FilterString[i]
+		header.SpectrumId = headerInfo.SpectrumId[i]
+		header.Centroided = headerInfo.Centroided[i]
+		header.IonMobilityDriftTime = JsonFloat64(headerInfo.IonMobilityDriftTime[i])
+		header.IsolationWindowTargetMZ = JsonFloat64(headerInfo.IsolationWindowTargetMZ[i])
+		header.IsolationWindowLowerOffset = JsonFloat64(headerInfo.IsolationWindowLowerOffset[i])
+		header.IsolationWindowUpperOffset = JsonFloat64(headerInfo.IsolationWindowUpperOffset[i])
+		header.ScanWindowLowerLimit = JsonFloat64(headerInfo.ScanWindowLowerLimit[i])
+		header.ScanWindowUpperLimit = JsonFloat64(headerInfo.ScanWindowUpperLimit[i])
+		result = append(result, header)
+	}
+	return result
+}
+
+func (data *MSData) HeaderData(scans ...int) HeaderInfo {
 	if len(scans) == 0 {
 		scans = data.GetAllScans()
 	}
@@ -294,11 +370,7 @@ func (data *MSData) Header(scans ...int) HeaderInfo {
 	header.IsolationWindowUpperOffset = cArray2GoSliceDouble(cisolationWindowUpperOffsetPtr, size)
 	header.ScanWindowLowerLimit = cArray2GoSliceDouble(cscanWindowLowerLimitPtr, size)
 	header.ScanWindowUpperLimit = cArray2GoSliceDouble(cscanWindowUpperLimitPtr, size)
-	/*errorM := C.GoString(cheader.error)
-	if errorM != "" {
-		println(errorM)
-		return HeaderInfo{}
-	}*/
+	header.Size = size
 	C.deleteScanHeader(cheaderPtr)
 	return header
 }

@@ -10,7 +10,6 @@
 package mzserver
 
 type GetSoftware200Response struct {
-
 	Software string `json:"software,omitempty"`
 }
 

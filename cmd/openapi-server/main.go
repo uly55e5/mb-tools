@@ -13,7 +13,7 @@ import (
 	"log"
 	"net/http"
 
-	mzserver "github.com/uly55e5/mb-tools/openapi-server/src"
+	mzserver "github.com/uly55e5/mb-tools/cmd/openapi-server/src"
 )
 
 func main() {

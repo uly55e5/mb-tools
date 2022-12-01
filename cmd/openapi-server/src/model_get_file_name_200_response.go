@@ -10,7 +10,6 @@
 package mzserver
 
 type GetFileName200Response struct {
-
 	Filename string `json:"filename,omitempty"`
 }
 

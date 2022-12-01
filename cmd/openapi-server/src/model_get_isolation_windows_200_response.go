@@ -10,7 +10,6 @@
 package mzserver
 
 type GetIsolationWindows200Response struct {
-
 	IsolationWindows []GetIsolationWindows200ResponseIsolationWindowsInner `json:"IsolationWindows,omitempty"`
 }
 

@@ -10,7 +10,6 @@
 package mzserver
 
 type GetInstrumentDetector200Response struct {
-
 	Detector string `json:"detector,omitempty"`
 }
 

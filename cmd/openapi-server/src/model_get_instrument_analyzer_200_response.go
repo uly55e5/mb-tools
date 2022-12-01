@@ -10,7 +10,6 @@
 package mzserver
 
 type GetInstrumentAnalyzer200Response struct {
-
 	Analyzer string `json:"analyzer,omitempty"`
 }
 

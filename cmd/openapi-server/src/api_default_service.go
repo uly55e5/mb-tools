@@ -13,7 +13,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
-	"github.com/uly55e5/mb-tools/mzmlReader"
+	mzmlReader2 "github.com/uly55e5/mb-tools/shared/mzmlReader"
 	"os"
 	"strconv"
 	"time"
@@ -32,7 +32,7 @@ func (s *DefaultApiService) GetChromatogramImage(ctx context.Context, chromatgra
 		return errResponse, nil
 	}
 	chrom := fileInfo.msdata.Chromatogram(int(chromatgramId))
-	pl, err := mzmlReader.PlotChromatogram(chrom)
+	pl, err := mzmlReader2.PlotChromatogram(chrom)
 	if err != nil {
 		return errResponse, nil
 	}
@@ -45,7 +45,7 @@ func (s *DefaultApiService) GetScanImage(ctx context.Context, ScanId int64, msDa
 		return errResponse, nil
 	}
 	peaks := fileInfo.msdata.Peaks(int(ScanId))
-	pl, err := mzmlReader.PlotScan(peaks, ScanId)
+	pl, err := mzmlReader2.PlotScan(peaks, ScanId)
 	if err != nil {
 		return errResponse, nil
 	}
@@ -238,8 +238,8 @@ func (s *DefaultApiService) GetScanHeader(ctx context.Context, msDataId string, 
 	if fileInfo == nil {
 		return errResponse, nil
 	}
-	header := fileInfo.msdata.Header()
-	headerMap := getMapFromStruct(header)
+	header := fileInfo.msdata.Headers(int(scanId))
+	headerMap := getMapFromStruct(header[0])
 	return Response(200, headerMap), nil
 }
 
@@ -307,7 +307,7 @@ func (s *DefaultApiService) PostFile(ctx context.Context, filename string, file 
 	if filename != "" && file != nil {
 		timestamp := time.Now().Unix()
 		id := fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.FormatInt(timestamp, 10)+filename)))[:45]
-		msData, err := mzmlReader.OpenMSData(file.Name())
+		msData, err := mzmlReader2.OpenMSData(file.Name())
 		if err != nil {
 			return Response(400, ErrorMsg{"Could not open file"}), nil
 		}

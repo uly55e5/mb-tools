@@ -2,10 +2,24 @@ package mzmlReader
 
 import "C"
 import (
+	"encoding/json"
+	"math"
 	"reflect"
 	"unsafe"
 )
 
+type JsonFloat64 float64
+
+func (f JsonFloat64) MarshalJSON() ([]byte, error) {
+	if math.IsNaN(float64(f)) {
+		return []byte("\"NaN\""), nil
+	} else if math.IsInf(float64(f), +1) {
+		return []byte("\"+Inf\""), nil
+	} else if math.IsInf(float64(f), -1) {
+		return []byte("\"+Inf\""), nil
+	}
+	return json.Marshal(float64(f))
+}
 func cArray2GoSliceInt(array *C.int, length int) []int {
 	var cSlice []C.int
 	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&cSlice))

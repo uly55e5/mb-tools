@@ -2,7 +2,7 @@ package mzserver
 
 import (
 	"encoding/json"
-	"github.com/uly55e5/mb-tools/mzmlReader"
+	"github.com/uly55e5/mb-tools/shared/mzmlReader"
 	"os"
 )
 
@@ -18,7 +18,22 @@ var files = map[string]fileData{}
 
 func getMapFromStruct(structData interface{}) map[string]interface{} {
 	var dataMap map[string]interface{}
-	jsonData, _ := json.Marshal(structData)
+	jsonData, err := json.Marshal(structData)
+	if err != nil {
+		println(err.Error())
+	}
+	err = json.Unmarshal(jsonData, &dataMap)
+	if err != nil {
+		println(err.Error())
+	}
+	return dataMap
+}
+
+func getMapFromArray(arrData interface{}) map[string]interface{} {
+	var dataMap map[string]interface{}
+	jsonData, _ := json.Marshal(struct {
+		a interface{}
+	}{arrData})
 	json.Unmarshal(jsonData, &dataMap)
 	return dataMap
 }

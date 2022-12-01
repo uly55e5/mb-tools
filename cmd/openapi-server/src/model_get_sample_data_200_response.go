@@ -10,7 +10,6 @@
 package mzserver
 
 type GetSampleData200Response struct {
-
 	Sample string `json:"sample,omitempty"`
 }
 

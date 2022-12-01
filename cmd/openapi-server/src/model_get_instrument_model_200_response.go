@@ -10,7 +10,6 @@
 package mzserver
 
 type GetInstrumentModel200Response struct {
-
 	Model string `json:"model,omitempty"`
 }
 

@@ -10,7 +10,6 @@
 package mzserver
 
 type GetIonisationMethod200Response struct {
-
 	Ionisation string `json:"ionisation,omitempty"`
 }
 

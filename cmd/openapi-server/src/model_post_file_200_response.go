@@ -10,7 +10,6 @@
 package mzserver
 
 type PostFile200Response struct {
-
 	Id string `json:"id,omitempty"`
 }
 

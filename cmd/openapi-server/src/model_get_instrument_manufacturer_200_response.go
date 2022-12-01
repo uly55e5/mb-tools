@@ -10,7 +10,6 @@
 package mzserver
 
 type GetInstrumentManufacturer200Response struct {
-
 	Manufacturer string `json:"manufacturer,omitempty"`
 }
 

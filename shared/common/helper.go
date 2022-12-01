@@ -1,6 +1,23 @@
 package common
 
-import "golang.org/x/exp/constraints"
+import (
+	"encoding/json"
+	"golang.org/x/exp/constraints"
+	"math"
+)
+
+type jsonFloat64 float64
+
+func (f jsonFloat64) MarshalJSON() ([]byte, error) {
+	if math.IsNaN(float64(f)) {
+		return []byte("\"NaN\""), nil
+	} else if math.IsInf(float64(f), +1) {
+		return []byte("\"+Inf\""), nil
+	} else if math.IsInf(float64(f), -1) {
+		return []byte("\"+Inf\""), nil
+	}
+	return json.Marshal(float64(f))
+}
 
 func Max[T constraints.Ordered](s []T) T {
 	if len(s) == 0 {

@@ -1,5 +1,5 @@
 generatorName: go-server
-output: openapi-server
+output: cmd/openapi-server
 apiDocs: true
 modelDocs: true
 apiTests: true
@@ -13,4 +13,4 @@ sourceFolder: src
 inputSpec: data/openapi/mzmlapi.yaml
 templateDir: data/openapi/templates/
 gitUserId: uly55e5
-gitRepoId: mb-tools/openapi-server
+gitRepoId: mb-tools/cmd/openapi-server
